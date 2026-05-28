@@ -50,6 +50,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
+  padding-bottom: 72px; /* espaço para a barra fixa */
   min-height: 100vh;
   padding: 24px 20px 60px;
 }
@@ -451,7 +452,7 @@ header {
 <div class="agenda-section">
   <div class="agenda-header">
     <div>
-      <h3>📅 Próximos 60 dias</h3>
+      <h3>📅 Próximos 14 dias</h3>
       <p>Agenda confirmada · Google Calendar</p>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
@@ -1472,8 +1473,7 @@ function toggleSection(id) {
       const envLabel = a.env === 'indoor' ? '🏠 Indoor' : a.env === 'outdoor' ? '☀️ Outdoor' : '🏠☀️ Indoor+Out';
       const envClass = a.env === 'indoor' ? 'badge-indoor' : a.env === 'outdoor' ? 'badge-outdoor' : 'badge-ambos';
       const kidsLabel = a.kids === 'ambos' ? '👧🏻👦🏻 Ambos' : a.kids === 'iara' ? '🌸 Iara' : '🦁 Caique';
-      const calUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('🎉 ' + a.nome) + '&dates=' + dateStr + '/' + dateStr + '&details=' + encodeURIComponent((a.obs||'') + (a.horas?'\n⏰ '+a.horas:'') + (a.link?'\n🔗 '+a.link:'')) + '&location=' + encodeURIComponent(a.nome + ', São Paulo');
-      return '<div class="act-card" id="card-' + a.id + '"><div class="act-card-top"><div class="act-card-name">' + a.nome + '</div><button class="btn-delete" onclick="deleteActivity(' + a.id + ')" title="Remover">✕</button></div><div class="act-card-meta"><span class="act-badge badge-tipo">' + tipoEmoji(a.tipo) + ' ' + a.tipo + '</span><span class="act-badge ' + envClass + '">' + envLabel + '</span><span class="act-badge badge-kids">' + kidsLabel + '</span></div><div class="act-card-info">' + (a.dist?'<div class="act-info-row">📍 '+a.dist+'</div>':'') + (a.horas?'<div class="act-info-row">⏰ '+a.horas+'</div>':'') + (a.obs?'<div class="act-info-row">💬 '+a.obs+'</div>':'') + (a.precoAdulto||a.precoCrianca?'<div class="act-info-row">💰 '+(a.precoAdulto?'Adulto: <strong>'+a.precoAdulto+'</strong>':'')+(a.precoAdulto&&a.precoCrianca?' · ':'')+(a.precoCrianca?'Criança: <strong>'+a.precoCrianca+'</strong>':'')+'</div>':'') + (a.link?'<div class="act-info-row">🔗 <a href="'+a.link+'" target="_blank" rel="noopener">Ver link</a></div>':'') + '</div><div class="act-card-footer"><select class="act-status-select" onchange="changeStatus(' + a.id + ',this.value)"><option value="quero"' + (a.status==='quero'?' selected':'') + '>🤍 Quero ir</option><option value="agendado"' + (a.status==='agendado'?' selected':'') + '>📅 Agendado — este fds</option><option value="feito"' + (a.status==='feito'?' selected':'') + '>✅ Já fui</option><option value="descartado"' + (a.status==='descartado'?' selected':'') + '>❌ Descartado</option></select><a class="btn-fds" href="' + calUrl + '" target="_blank" rel="noopener">📅 Prog. fds</a></div></div>';
+      return '<div class="act-card" id="card-' + a.id + '"><div class="act-card-top"><div class="act-card-name">' + a.nome + '</div><button class="btn-delete" onclick="deleteActivity(' + a.id + ')" title="Remover">✕</button></div><div class="act-card-meta"><span class="act-badge badge-tipo">' + tipoEmoji(a.tipo) + ' ' + a.tipo + '</span><span class="act-badge ' + envClass + '">' + envLabel + '</span><span class="act-badge badge-kids">' + kidsLabel + '</span></div><div class="act-card-info">' + (a.dist?'<div class="act-info-row">📍 '+a.dist+'</div>':'') + (a.horas?'<div class="act-info-row">⏰ '+a.horas+'</div>':'') + (a.obs?'<div class="act-info-row">💬 '+a.obs+'</div>':'') + (a.precoAdulto||a.precoCrianca?'<div class="act-info-row">💰 '+(a.precoAdulto?'Adulto: <strong>'+a.precoAdulto+'</strong>':'')+(a.precoAdulto&&a.precoCrianca?' · ':'')+(a.precoCrianca?'Criança: <strong>'+a.precoCrianca+'</strong>':'')+'</div>':'') + (a.link?'<div class="act-info-row">🔗 <a href="'+a.link+'" target="_blank" rel="noopener">Ver link</a></div>':'') + '</div><div class="act-card-footer"><select class="act-status-select" onchange="changeStatus(' + a.id + ',this.value)"><option value="quero"' + (a.status==='quero'?' selected':'') + '>🤍 Quero ir</option><option value="agendado"' + (a.status==='agendado'?' selected':'') + '>📅 Agendado — este fds</option><option value="feito"' + (a.status==='feito'?' selected':'') + '>✅ Já fui</option><option value="descartado"' + (a.status==='descartado'?' selected':'') + '>❌ Descartado</option></select><button class="btn-fds" onclick="scheduleWeekend(' + a.id + ')">📅 Prog. fds</button></div></div>';
     }).join('');
   }
 
@@ -1502,6 +1502,45 @@ function toggleSection(id) {
   };
   window.deleteActivity = function(id) { if (!confirm('Remover essa atividade?')) return; activities = activities.filter(a => a.id !== id); save(); render(); };
   window.changeStatus = function(id, status) { const a = activities.find(x => x.id === id); if (a) { a.status = status; save(); render(); renderFdsDestaque(); } };
+
+  // Agenda próximo sábado via /api/calendar-write
+  window.scheduleWeekend = async function(id) {
+    const a = activities.find(x => x.id === id);
+    if (!a) return;
+    const today = new Date();
+    const daysUntilSat = (6 - today.getDay() + 7) % 7 || 7;
+    const sat = new Date(today); sat.setDate(today.getDate() + daysUntilSat);
+    const dateStr = sat.toISOString().split('T')[0];
+
+    const btn = document.querySelector('#card-' + id + ' .btn-fds');
+    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+
+    try {
+      const res = await fetch('/api/calendar-write', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ events: [{
+          title: '🎉 ' + a.nome,
+          date: dateStr,
+          time: null,
+          endTime: null,
+          description: [a.obs, a.horas ? '⏰ ' + a.horas : '', a.link ? '🔗 ' + a.link : ''].filter(Boolean).join('\n'),
+          person: a.kids === 'iara' ? 'iara' : a.kids === 'caique' ? 'caique' : 'familia'
+        }]})
+      });
+      const data = await res.json();
+      if (data.created) {
+        if (btn) { btn.textContent = '✅ Agendado!'; }
+        // Atualiza status para agendado
+        a.status = 'agendado'; save(); render();
+        setTimeout(() => loadCalendar(), 1000);
+      } else {
+        if (btn) { btn.textContent = '❌ Erro'; btn.disabled = false; }
+      }
+    } catch(e) {
+      if (btn) { btn.textContent = '❌ Erro'; btn.disabled = false; }
+    }
+  };
 
   render();
 })();
@@ -1771,8 +1810,24 @@ window.addEventListener('load', () => {
 });
 
 // ── CALENDÁRIO DINÂMICO ───────────────────────────────────────
-const DAYS_PT  = ['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+const DAYS_PT   = ['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
 const MONTHS_PT = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+// Palavras que indicam evento irrelevante para a família
+const NOISE_KEYWORDS = [
+  'banho','tosa','veterinário','cachorro','pet','cartão','fatura',
+  'conta de luz','conta de água','boleto','internet','academia','trabalho'
+];
+function isNoise(ev) {
+  const text = (ev.title + ' ' + (ev.description||'')).toLowerCase();
+  return NOISE_KEYWORDS.some(k => text.includes(k));
+}
+
+// Palavras que identificam evento de aniversário
+function isBirthday(ev) {
+  const text = (ev.title + ' ' + (ev.description||'')).toLowerCase();
+  return text.includes('aniversário') || text.includes('birthday') || text.includes('nascimento') || text.includes(' anos') || text.includes('🎂') || text.includes('🎉');
+}
 
 function evDate(dateStr) {
   // all-day events: "2026-06-01" → parse as local date
@@ -1828,9 +1883,11 @@ function renderEventItem(ev) {
     </div>`;
 }
 
+// Cache de todos os eventos para reutilizar nos aniversários e no botão fds
+window._calEvents = [];
+
 async function loadCalendar() {
   const listEl = document.querySelector('.agenda-list');
-  const liveEl = document.querySelector('.agenda-live');
   if (!listEl) return;
 
   try {
@@ -1838,147 +1895,164 @@ async function loadCalendar() {
     if (!res.ok) throw new Error('Erro ' + res.status);
     const { events } = await res.json();
 
-    if (!events.length) {
-      listEl.innerHTML = '<div style="padding:14px 0;font-size:13px;color:var(--text-2);">Nenhum evento nos próximos 60 dias.</div>';
-      return;
+    // Separa aniversários e eventos normais, remove ruído
+    const now = new Date(); now.setHours(0,0,0,0);
+    const in14 = new Date(now.getTime() + 14 * 86400000);
+
+    const birthdays = events.filter(e => isBirthday(e) && !isNoise(e));
+    const regular   = events.filter(e => !isBirthday(e) && !isNoise(e));
+
+    window._calEvents = regular;
+
+    // Alimenta seção de aniversários dinâmica
+    renderCalBirthdays(birthdays);
+
+    // Divide em 14 dias visíveis + restante colapsado
+    const visible = regular.filter(e => evDate(e.start) <= in14);
+    const more    = regular.filter(e => evDate(e.start) > in14);
+
+    let html = visible.length
+      ? visible.map(renderEventItem).join('')
+      : '<div style="padding:14px 0;font-size:13px;color:var(--text-2);">Sem eventos nos próximos 14 dias.</div>';
+
+    if (more.length) {
+      html += `
+        <div id="agenda-more-toggle" onclick="toggleAgendaMore()" style="
+          padding:11px 0;text-align:center;font-size:12.5px;font-weight:600;
+          color:var(--iara);cursor:pointer;border-top:1px solid var(--border);
+        ">▾ Ver mais ${more.length} evento(s)</div>
+        <div id="agenda-more" style="display:none;">${more.map(renderEventItem).join('')}</div>`;
     }
 
-    listEl.innerHTML = events.map(renderEventItem).join('');
+    listEl.innerHTML = html;
 
     const badge = document.getElementById('agenda-live-badge');
     if (badge) {
-      const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      badge.textContent = '● ' + events.length + ' eventos · ' + now;
+      const t = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      badge.textContent = '● ' + visible.length + ' eventos · ' + t;
     }
 
   } catch (e) {
     const badge = document.getElementById('agenda-live-badge');
     if (badge) { badge.textContent = '⚠ offline'; badge.style.color = 'var(--orange)'; }
-    console.error('Calendar error:', e.message);
   }
 }
 
-// ── ASSISTENTE UNIFICADO (voz + texto + arquivo) ──────────────
+window.toggleAgendaMore = function() {
+  const el = document.getElementById('agenda-more');
+  const btn = document.getElementById('agenda-more-toggle');
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (btn) btn.textContent = open ? '▾ Ver mais' : '▴ Recolher';
+};
+
+function renderCalBirthdays(birthdays) {
+  const wrap = document.getElementById('bday-wrap');
+  if (!wrap || !birthdays.length) return;
+  const KEY = 'fam-gifts-v2';
+  const giftData = JSON.parse(localStorage.getItem(KEY) || '{}');
+  const mons = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  function daysUntil(dateStr) {
+    const t = new Date(); t.setHours(0,0,0,0);
+    return Math.round((evDate(dateStr) - t) / 86400000);
+  }
+  const sorted = birthdays.map(b => ({...b, days: daysUntil(b.start)})).filter(b => b.days >= 0).sort((a,b) => a.days - b.days);
+  wrap.innerHTML = sorted.map(b => {
+    const dt = evDate(b.start);
+    const soon = b.days <= 60;
+    const bId = 'cal-' + b.id;
+    const gifts = giftData[bId] || [];
+    const dLabel = b.days === 0 ? '🎉 HOJE!' : b.days === 1 ? '⚡ AMANHÃ' : b.days <= 14 ? '⚡ Em '+b.days+' dias' : 'Em '+b.days+' dias';
+    const gHtml = gifts.map((g,i) => `<label class="gift-item${g.done?' done':''}"><input type="checkbox"${g.done?' checked':''} onchange="toggleGift('${bId}',${i},this.checked)"><span>${g.text}</span></label>`).join('');
+    return `<div class="bday-item">
+      <div class="bday-date-box${soon?' bday-soon':''}">
+        <span class="day" style="color:${soon?'#854d0e':'var(--text)'};">${dt.getDate()}</span>
+        <span class="mon">${mons[dt.getMonth()]}</span>
+      </div>
+      <div class="bday-info">
+        <div class="bday-name">🎂 ${b.title}</div>
+        <div class="bday-sub">${dLabel}</div>
+        ${gifts.length?'<div class="gift-checklist">'+gHtml+'</div>':''}
+        <div class="gift-add-row">
+          <input class="gift-add-input" id="gi-${bId}" type="text" placeholder="Ideia de presente…" onkeydown="if(event.key==='Enter')addGift('${bId}')"/>
+          <button class="gift-add-btn" onclick="addGift('${bId}')">＋ Presente</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ASSISTENTE ESTILO WHATSAPP ────────────────────────────────
 (function () {
 
-  // ── UI ──
-  const btn = document.createElement('button');
-  btn.id = 'ast-btn';
-  btn.innerHTML = '✦';
-  btn.setAttribute('aria-label', 'Assistente');
-  btn.style.cssText = `
-    position:fixed;bottom:24px;right:20px;z-index:1000;
-    width:58px;height:58px;border-radius:50%;border:none;
-    background:#7c3aed;color:#fff;font-size:26px;
-    box-shadow:0 4px 18px rgba(124,58,237,.45);
-    cursor:pointer;display:flex;align-items:center;justify-content:center;
-    transition:transform .15s,background .15s;
+  // ── Barra fixa no rodapé ──
+  const bar = document.createElement('div');
+  bar.id = 'ast-bar';
+  bar.style.cssText = `
+    position:fixed;bottom:0;left:0;right:0;z-index:1000;
+    background:#fff;border-top:1px solid #e8e8e4;
+    padding:10px 12px;padding-bottom:max(10px, env(safe-area-inset-bottom));
+    display:flex;align-items:flex-end;gap:8px;
+    box-shadow:0 -2px 12px rgba(0,0,0,.08);
   `;
+  bar.innerHTML = `
+    <button id="ast-file-btn" title="Anexar arquivo" style="
+      flex-shrink:0;width:38px;height:38px;border-radius:50%;border:none;
+      background:#f3f4f6;color:#555;font-size:18px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+    ">📎</button>
+    <input id="ast-file-input" type="file" accept="image/*,application/pdf" style="display:none">
+    <textarea id="ast-text-input" rows="1" placeholder="Pergunte, dite uma tarefa…" style="
+      flex:1;border:1px solid #e5e7eb;border-radius:20px;padding:9px 14px;
+      font-size:14px;font-family:inherit;resize:none;outline:none;
+      max-height:120px;overflow-y:auto;line-height:1.4;
+      background:#f9fafb;color:#111827;
+    "></textarea>
+    <button id="ast-action-btn" title="Gravar ou enviar" style="
+      flex-shrink:0;width:38px;height:38px;border-radius:50%;border:none;
+      background:#7c3aed;color:#fff;font-size:18px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;transition:background 0.2s;
+    ">🎙️</button>
+  `;
+  document.body.style.paddingBottom = '72px';
+  document.body.appendChild(bar);
+
+  // ── Bubble de resultado ──
+  const bubble = document.createElement('div');
+  bubble.id = 'ast-bubble';
+  bubble.style.cssText = `
+    display:none;position:fixed;bottom:72px;left:12px;right:12px;z-index:999;
+    background:#fff;border-radius:16px;padding:16px;
+    box-shadow:0 4px 24px rgba(0,0,0,.15);border:1px solid #e8e8e4;
+    max-height:60vh;overflow-y:auto;
+  `;
+  bubble.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.06em;">Assistente</span>
+      <button id="ast-close" style="background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;padding:0;">✕</button>
+    </div>
+    <div id="ast-transcript" style="display:none;font-size:13px;color:#888;margin-bottom:8px;font-style:italic;"></div>
+    <div id="ast-answer" style="display:none;font-size:14.5px;color:#111;line-height:1.5;margin-bottom:6px;"></div>
+    <div id="ast-action-badge" style="display:none;font-size:13px;font-weight:600;color:#059669;margin-bottom:6px;"></div>
+    <div id="ast-status" style="font-size:13px;color:#7c3aed;"></div>
+    <div id="ast-events-wrap" style="display:none;margin-top:10px;">
+      <div id="ast-events-summary" style="font-size:13px;color:#374151;margin-bottom:8px;font-weight:500;"></div>
+      <div id="ast-events-list" style="margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button id="ast-cal-confirm" style="flex:1;padding:10px;background:#059669;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">✅ Adicionar ao Calendário</button>
+        <button id="ast-cal-cancel" style="padding:10px 14px;background:#f3f4f6;color:#374151;border:none;border-radius:10px;font-size:14px;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(bubble);
 
   const overlay = document.createElement('div');
   overlay.id = 'ast-overlay';
-  overlay.style.cssText = `
-    display:none;position:fixed;inset:0;z-index:999;
-    background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
-    align-items:flex-end;justify-content:center;
-  `;
-
-  const panel = document.createElement('div');
-  panel.style.cssText = `
-    background:#fff;border-radius:20px 20px 0 0;padding:20px;
-    width:100%;max-width:520px;max-height:88vh;overflow-y:auto;
-    box-shadow:0 -4px 30px rgba(0,0,0,.18);
-  `;
-  panel.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <span style="font-weight:700;font-size:15px;">✦ Assistente</span>
-      <button id="ast-close" style="border:none;background:none;font-size:20px;cursor:pointer;color:#666;">✕</button>
-    </div>
-
-    <!-- Status e resposta -->
-    <div id="ast-status" style="font-size:13px;color:#7c3aed;min-height:18px;margin-bottom:8px;"></div>
-    <div id="ast-transcript" style="
-      font-size:13px;color:#6b6b6b;background:#f5f5f0;
-      border-radius:10px;padding:10px 12px;margin-bottom:8px;display:none;
-    "></div>
-    <div id="ast-answer" style="
-      font-size:14px;line-height:1.65;display:none;
-      border-top:1px solid #e8e8e4;padding-top:12px;margin-bottom:8px;
-    "></div>
-    <div id="ast-action-badge" style="
-      display:none;margin-bottom:12px;padding:8px 12px;border-radius:10px;
-      background:#ecfdf5;border:1px solid #6ee7b7;font-size:12px;color:#059669;
-    "></div>
-
-    <!-- Eventos encontrados em imagem -->
-    <div id="ast-events-wrap" style="display:none;">
-      <div id="ast-events-summary" style="
-        font-size:13px;color:#6b6b6b;background:#f5f5f0;
-        border-radius:10px;padding:10px 12px;margin-bottom:10px;
-      "></div>
-      <div id="ast-events-list"></div>
-      <div style="display:flex;gap:10px;margin-top:14px;">
-        <button id="ast-cal-confirm" style="
-          flex:1;padding:12px;border-radius:12px;border:none;
-          background:#059669;color:#fff;font-size:14px;font-weight:600;cursor:pointer;
-        ">✅ Adicionar ao Calendário</button>
-        <button id="ast-cal-cancel" style="
-          padding:12px 16px;border-radius:12px;
-          border:1px solid var(--border);background:#fff;
-          font-size:14px;cursor:pointer;color:var(--text-2);
-        ">Cancelar</button>
-      </div>
-    </div>
-
-    <!-- Barra de input -->
-    <div style="display:flex;gap:8px;align-items:flex-end;margin-top:4px;">
-      <div style="flex:1;position:relative;">
-        <textarea id="ast-text-input" placeholder="Digite ou fale sua pergunta…" rows="1" style="
-          width:100%;padding:11px 14px;border-radius:12px;
-          border:1.5px solid var(--border);font-size:14px;
-          font-family:inherit;resize:none;outline:none;
-          transition:border-color .15s;line-height:1.4;
-          max-height:120px;overflow-y:auto;
-        "></textarea>
-      </div>
-      <!-- Enviar texto -->
-      <button id="ast-send-btn" title="Enviar" style="
-        width:44px;height:44px;border-radius:12px;border:none;flex-shrink:0;
-        background:#7c3aed;color:#fff;font-size:18px;cursor:pointer;
-        display:flex;align-items:center;justify-content:center;
-      ">↑</button>
-      <!-- Voz -->
-      <button id="ast-mic-btn" title="Falar" style="
-        width:44px;height:44px;border-radius:12px;border:none;flex-shrink:0;
-        background:#f3effe;color:#7c3aed;font-size:20px;cursor:pointer;
-        display:flex;align-items:center;justify-content:center;
-        border:1.5px solid var(--iara-border);
-      ">🎙️</button>
-      <!-- Arquivo -->
-      <button id="ast-file-btn" title="Enviar arquivo ou foto" style="
-        width:44px;height:44px;border-radius:12px;border:none;flex-shrink:0;
-        background:#f3effe;color:#7c3aed;font-size:20px;cursor:pointer;
-        display:flex;align-items:center;justify-content:center;
-        border:1.5px solid var(--iara-border);
-      ">📎</button>
-      <input type="file" id="ast-file-input" accept="image/*,application/pdf,.doc,.docx" style="display:none;">
-    </div>
-    <div style="font-size:11px;color:var(--text-2);margin-top:8px;text-align:center;">
-      Digite · 🎙️ Fale · 📎 Foto ou arquivo (agenda, receita, exame…)
-    </div>
-  `;
-
-  overlay.appendChild(panel);
-  document.body.appendChild(btn);
+  overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:998;';
   document.body.appendChild(overlay);
 
-  // ── Estado ──
-  let isRecording = false;
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let pendingCalEvents = [];
-
-  // ── Helpers ──
+  let isRecording = false, mediaRecorder = null, audioChunks = [], pendingCalEvents = [];
   const $ = id => document.getElementById(id);
 
   function setStatus(msg, color) {
@@ -1986,56 +2060,46 @@ async function loadCalendar() {
     if (el) { el.textContent = msg; el.style.color = color || '#7c3aed'; }
   }
 
-  function resetPanel() {
+  function openBubble() {
+    bubble.style.display = 'block';
+    overlay.style.display = 'block';
+  }
+
+  function closeBubble() {
+    bubble.style.display = 'none';
+    overlay.style.display = 'none';
     $('ast-transcript').style.display = 'none';
     $('ast-answer').style.display = 'none';
     $('ast-action-badge').style.display = 'none';
     $('ast-events-wrap').style.display = 'none';
-    $('ast-text-input').value = '';
-    pendingCalEvents = [];
     setStatus('');
+    pendingCalEvents = [];
   }
 
-  function openPanel() {
-    overlay.style.display = 'flex';
-    resetPanel();
-    setTimeout(() => $('ast-text-input')?.focus(), 100);
+  function syncActionBtn() {
+    const btn = $('ast-action-btn');
+    if (isRecording) {
+      btn.textContent = '⏹'; btn.style.background = '#dc2626';
+    } else if ($('ast-text-input').value.trim()) {
+      btn.textContent = '↑'; btn.style.background = '#059669';
+    } else {
+      btn.textContent = '🎙️'; btn.style.background = '#7c3aed';
+    }
   }
 
-  function closePanel() {
-    overlay.style.display = 'none';
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-    isRecording = false;
-    setMicBtn(false);
-  }
-
-  function setMicBtn(rec) {
-    const b = $('ast-mic-btn');
-    if (!b) return;
-    b.textContent = rec ? '⏹' : '🎙️';
-    b.style.background = rec ? '#fee2e2' : '#f3effe';
-    b.style.color = rec ? '#dc2626' : '#7c3aed';
-    b.style.borderColor = rec ? '#fca5a5' : 'var(--iara-border)';
-  }
-
-  // ── Executa ações no portal (localStorage) ──
   function executeAction(action) {
-    if (!action || action.type === 'none' || !action.type) return;
+    if (!action || action.type === 'none') return;
     const badge = $('ast-action-badge');
     const today = new Date().toISOString().split('T')[0];
-
     if (action.type === 'add_task') {
-      const person = action.person || 'familia';
-      const tasks = JSON.parse(localStorage.getItem('familia-tasks-' + person) || '[]');
-      tasks.unshift({ id: Date.now(), text: action.title || action.details, done: false, date: today });
-      localStorage.setItem('familia-tasks-' + person, JSON.stringify(tasks));
-      badge.textContent = '✅ Tarefa adicionada: ' + (action.title || '');
-      badge.style.display = 'block';
-      if (typeof window.renderTasks === 'function') window.renderTasks(person);
-      return;
-    }
-    if (action.type === 'complete_task') {
-      const needle = (action.title || action.details || '').toLowerCase();
+      const p = action.person || 'familia';
+      const tasks = JSON.parse(localStorage.getItem('familia-tasks-' + p) || '[]');
+      tasks.unshift({ id: Date.now(), text: action.title + (action.details ? ' — ' + action.details : ''), done: false, date: action.date || today });
+      localStorage.setItem('familia-tasks-' + p, JSON.stringify(tasks));
+      if (typeof window.renderTasks === 'function') window.renderTasks(p);
+      badge.textContent = '✅ Tarefa adicionada!'; badge.style.display = 'block';
+    } else if (action.type === 'complete_task') {
+      const needle = (action.title || '').toLowerCase();
       ['iara','caique','familia'].forEach(p => {
         const key = 'familia-tasks-' + p;
         const tasks = JSON.parse(localStorage.getItem(key) || '[]');
@@ -2043,126 +2107,90 @@ async function loadCalendar() {
         tasks.forEach(t => { if (t.text.toLowerCase().includes(needle)) { t.done = true; changed = true; } });
         if (changed) { localStorage.setItem(key, JSON.stringify(tasks)); if (typeof window.renderTasks === 'function') window.renderTasks(p); }
       });
-      badge.textContent = '✅ Tarefa marcada como concluída!';
-      badge.style.display = 'block';
-      return;
-    }
-    if (action.type === 'add_note') {
-      const person = action.person || 'geral';
-      const notes = JSON.parse(localStorage.getItem('familia-notes-' + person) || '[]');
+      badge.textContent = '✅ Marcado como concluído!'; badge.style.display = 'block';
+    } else if (action.type === 'add_note') {
+      const p = action.person || 'geral';
+      const notes = JSON.parse(localStorage.getItem('familia-notes-' + p) || '[]');
       notes.unshift({ id: Date.now(), text: action.details || action.title, date: today });
-      localStorage.setItem('familia-notes-' + person, JSON.stringify(notes));
-      badge.textContent = '📝 Anotação salva!';
-      badge.style.display = 'block';
-      return;
+      localStorage.setItem('familia-notes-' + p, JSON.stringify(notes));
+      badge.textContent = '📝 Anotação salva!'; badge.style.display = 'block';
     }
   }
 
-  // ── Mostra resposta de voz/texto ──
-  function showVoiceResult(data) {
+  function showResult(data) {
+    openBubble();
     if (data.transcript) {
-      const t = $('ast-transcript');
-      t.textContent = '🗣️ "' + data.transcript + '"';
-      t.style.display = 'block';
+      $('ast-transcript').textContent = '🗣️ "' + data.transcript + '"';
+      $('ast-transcript').style.display = 'block';
     }
     if (data.reply) {
-      const a = $('ast-answer');
-      a.innerHTML = data.reply.replace(/\n/g, '<br>');
-      a.style.display = 'block';
+      $('ast-answer').innerHTML = data.reply.replace(/\n/g, '<br>');
+      $('ast-answer').style.display = 'block';
     }
-    setStatus('✅ Pronto', '#059669');
+    setStatus('');
     if (data.action && data.action.type !== 'none') executeAction(data.action);
   }
 
-  // ── Envia ÁUDIO → /api/voice ──
-  async function sendAudio(audioBlob) {
-    setStatus('⏳ Transcrevendo…');
+  async function sendAudio(blob) {
+    openBubble(); setStatus('⏳ Transcrevendo…');
     try {
-      const res = await fetch('/api/voice', {
-        method: 'POST',
-        headers: { 'Content-Type': audioBlob.type || 'audio/webm' },
-        body: audioBlob
-      });
-      if (!res.ok) throw new Error((await res.json().catch(()=>({}))).error || 'Erro ' + res.status);
-      showVoiceResult(await res.json());
-    } catch (e) { setStatus('❌ ' + e.message, '#dc2626'); }
+      const res = await fetch('/api/voice', { method: 'POST', headers: { 'Content-Type': blob.type || 'audio/webm' }, body: blob });
+      if (!res.ok) throw new Error('Erro ' + res.status);
+      showResult(await res.json());
+    } catch(e) { setStatus('❌ ' + e.message, '#dc2626'); }
   }
 
-  // ── Envia TEXTO → /api/voice ──
   async function sendText(text) {
     if (!text.trim()) return;
-    const t = $('ast-transcript');
-    t.textContent = '💬 "' + text + '"';
-    t.style.display = 'block';
-    setStatus('⏳ Interpretando…');
+    $('ast-text-input').value = ''; syncActionBtn();
+    openBubble();
+    $('ast-transcript').textContent = '💬 "' + text + '"';
+    $('ast-transcript').style.display = 'block';
     $('ast-answer').style.display = 'none';
+    setStatus('⏳ Interpretando…');
     try {
-      const res = await fetch('/api/voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
-      if (!res.ok) throw new Error((await res.json().catch(()=>({}))).error || 'Erro ' + res.status);
-      showVoiceResult(await res.json());
-    } catch (e) { setStatus('❌ ' + e.message, '#dc2626'); }
-  }
-
-  // ── Envia IMAGEM/ARQUIVO → /api/read-image ──
-  const MONTHS_CAL = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-
-  function renderCalEvents(events) {
-    $('ast-events-list').innerHTML = events.map((ev, i) => {
-      const d = new Date(ev.date + 'T12:00:00');
-      const dl = `${d.getDate()} ${MONTHS_CAL[d.getMonth()]}`;
-      const pColor = ev.person==='iara' ? 'var(--iara)' : ev.person==='caique' ? 'var(--caique)' : 'var(--green)';
-      const pBg = ev.person==='iara' ? 'var(--iara-light)' : ev.person==='caique' ? 'var(--caique-light)' : 'var(--green-light)';
-      return `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
-        <input type="checkbox" data-idx="${i}" checked style="margin-top:3px;width:16px;height:16px;accent-color:#059669;cursor:pointer;">
-        <div style="flex:1;">
-          <div style="font-size:13.5px;font-weight:600;">${ev.title}</div>
-          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">📅 ${dl}${ev.time?' às '+ev.time:''}${ev.description?' · '+ev.description:''}</div>
-          <span style="font-size:11px;font-weight:600;background:${pBg};color:${pColor};border-radius:5px;padding:1px 8px;margin-top:4px;display:inline-block;">
-            ${ev.person==='iara'?'Iara':ev.person==='caique'?'Caique':'Família'}
-          </span>
-        </div>
-      </div>`;
-    }).join('');
+      const res = await fetch('/api/voice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+      if (!res.ok) throw new Error('Erro ' + res.status);
+      showResult(await res.json());
+    } catch(e) { setStatus('❌ ' + e.message, '#dc2626'); }
   }
 
   async function sendFile(file) {
-    setStatus('⏳ Lendo ' + file.name + ' com IA…');
+    openBubble(); setStatus('⏳ Lendo ' + file.name + ' com IA…');
     const reader = new FileReader();
     reader.onloadend = async () => {
-      const base64 = reader.result.split(',')[1];
       try {
         const res = await fetch('/api/read-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: base64, mimeType: file.type })
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: reader.result.split(',')[1], mimeType: file.type })
         });
         if (!res.ok) throw new Error('Erro ' + res.status);
         const data = await res.json();
-
-        if (data.summary) {
-          $('ast-events-summary').textContent = data.summary;
-        }
+        if (data.summary) $('ast-events-summary').textContent = data.summary;
         pendingCalEvents = data.events || [];
-
-        if (!pendingCalEvents.length) {
-          setStatus('⚠️ Nenhum evento encontrado.', '#d97706');
-          return;
-        }
-
-        renderCalEvents(pendingCalEvents);
+        if (!pendingCalEvents.length) { setStatus('⚠️ Nenhum evento encontrado.', '#d97706'); return; }
+        const mons = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+        $('ast-events-list').innerHTML = pendingCalEvents.map((ev, i) => {
+          const d = new Date(ev.date + 'T12:00:00');
+          const pBg = ev.person==='iara'?'var(--iara-light)':ev.person==='caique'?'var(--caique-light)':'var(--green-light)';
+          const pColor = ev.person==='iara'?'var(--iara)':ev.person==='caique'?'var(--caique)':'var(--green)';
+          const pLabel = ev.person==='iara'?'Iara':ev.person==='caique'?'Caique':'Família';
+          return `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+            <input type="checkbox" data-idx="${i}" checked style="margin-top:3px;width:16px;height:16px;accent-color:#059669;cursor:pointer;">
+            <div style="flex:1;">
+              <div style="font-size:13.5px;font-weight:600;">${ev.title}</div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px;">📅 ${d.getDate()} ${mons[d.getMonth()]}${ev.time?' às '+ev.time:''}${ev.description?' · '+ev.description:''}</div>
+              <span style="font-size:11px;font-weight:600;background:${pBg};color:${pColor};border-radius:5px;padding:1px 8px;margin-top:4px;display:inline-block;">${pLabel}</span>
+            </div>
+          </div>`;
+        }).join('');
         $('ast-events-wrap').style.display = 'block';
-        setStatus(`✅ ${pendingCalEvents.length} evento(s) encontrado(s). Confirme para adicionar.`, '#059669');
-
-      } catch (e) { setStatus('❌ ' + e.message, '#dc2626'); }
+        setStatus('✅ ' + pendingCalEvents.length + ' evento(s) encontrado(s). Confirme para adicionar.', '#059669');
+      } catch(e) { setStatus('❌ ' + e.message, '#dc2626'); }
     };
     reader.readAsDataURL(file);
   }
 
-  // ── Gravação de áudio ──
   async function startRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -2172,95 +2200,63 @@ async function loadCalendar() {
       mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
       mediaRecorder.onstop = () => {
         stream.getTracks().forEach(t => t.stop());
-        const usedType = mediaRecorder.mimeType || mimeType || 'audio/webm';
-        sendAudio(new Blob(audioChunks, { type: usedType }));
+        sendAudio(new Blob(audioChunks, { type: mediaRecorder.mimeType || mimeType || 'audio/webm' }));
       };
       mediaRecorder.start();
-      isRecording = true;
-      setMicBtn(true);
-      setStatus('🔴 Gravando… toque ⏹ para parar.');
-    } catch (e) { setStatus('❌ Permissão de microfone negada.', '#dc2626'); }
+      isRecording = true; syncActionBtn();
+      openBubble(); setStatus('🔴 Gravando… toque ⏹ para parar.');
+    } catch(e) {
+      openBubble(); setStatus('❌ Microfone não autorizado.', '#dc2626');
+    }
   }
 
   function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop(); isRecording = false; setMicBtn(false);
-      setStatus('⏳ Processando…');
-    }
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    isRecording = false; syncActionBtn();
   }
 
-  // ── Listeners ──
-  btn.addEventListener('click', openPanel);
-  overlay.addEventListener('click', e => { if (e.target === overlay) closePanel(); });
-
-  panel.addEventListener('click', e => {
-    if (e.target.id === 'ast-close') closePanel();
-
-    if (e.target.id === 'ast-send-btn') {
-      const text = $('ast-text-input')?.value?.trim();
-      if (text) { resetPanel(); sendText(text); }
-    }
-
-    if (e.target.id === 'ast-mic-btn') {
-      if (isRecording) stopRecording(); else { resetPanel(); startRecording(); }
-    }
-
-    if (e.target.id === 'ast-file-btn') {
-      $('ast-file-input')?.click();
-    }
-
-    if (e.target.id === 'ast-cal-cancel') {
-      $('ast-events-wrap').style.display = 'none';
-      pendingCalEvents = [];
-      setStatus('');
-    }
-
-    if (e.target.id === 'ast-cal-confirm') {
-      const checked = [...panel.querySelectorAll('#ast-events-list input[type=checkbox]:checked')]
-        .map(cb => pendingCalEvents[parseInt(cb.dataset.idx)]);
-      if (!checked.length) { setStatus('⚠️ Selecione ao menos um evento.', '#d97706'); return; }
-      $('ast-cal-confirm').disabled = true;
-      setStatus('⏳ Adicionando ao Google Calendar…');
-      fetch('/api/calendar-write', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ events: checked })
-      })
-      .then(r => r.json())
-      .then(data => {
-        setStatus(`✅ ${data.created} evento(s) adicionado(s)!`, '#059669');
-        $('ast-events-wrap').style.display = 'none';
-        setTimeout(() => loadCalendar(), 1500);
-      })
-      .catch(e => { setStatus('❌ ' + e.message, '#dc2626'); $('ast-cal-confirm').disabled = false; });
-    }
+  $('ast-close').addEventListener('click', closeBubble);
+  overlay.addEventListener('click', closeBubble);
+  $('ast-file-btn').addEventListener('click', () => $('ast-file-input').click());
+  $('ast-file-input').addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (file) { sendFile(file); e.target.value = ''; }
   });
-
-  // Enter no textarea envia
-  panel.querySelector('#ast-text-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      const text = e.target.value.trim();
-      if (text) { resetPanel(); sendText(text); }
-    }
-  });
-
-  // Auto-resize do textarea
-  panel.querySelector('#ast-text-input').addEventListener('input', function() {
+  $('ast-text-input').addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    syncActionBtn();
   });
-
-  // Upload de arquivo
-  panel.querySelector('#ast-file-input').addEventListener('change', function() {
-    const file = this.files?.[0];
-    if (!file) return;
-    this.value = '';
-    resetPanel();
-    sendFile(file);
+  $('ast-text-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); const t = $('ast-text-input').value.trim(); if (t) sendText(t); }
+  });
+  $('ast-action-btn').addEventListener('click', () => {
+    const text = $('ast-text-input').value.trim();
+    if (isRecording) stopRecording();
+    else if (text) sendText(text);
+    else startRecording();
+  });
+  $('ast-cal-confirm').addEventListener('click', async () => {
+    const toAdd = [...document.querySelectorAll('#ast-events-list input[type=checkbox]:checked')]
+      .map(cb => pendingCalEvents[parseInt(cb.dataset.idx)]).filter(Boolean);
+    if (!toAdd.length) { setStatus('⚠️ Selecione ao menos um evento.', '#d97706'); return; }
+    $('ast-cal-confirm').disabled = true;
+    setStatus('⏳ Adicionando ao Google Calendar…');
+    try {
+      const res = await fetch('/api/calendar-write', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ events: toAdd }) });
+      if (!res.ok) throw new Error('Erro ' + res.status);
+      const data = await res.json();
+      setStatus('✅ ' + data.created + ' evento(s) adicionado(s)!', '#059669');
+      $('ast-events-wrap').style.display = 'none';
+      setTimeout(() => { closeBubble(); loadCalendar(); }, 1800);
+    } catch(e) { setStatus('❌ ' + e.message, '#dc2626'); $('ast-cal-confirm').disabled = false; }
+  });
+  $('ast-cal-cancel').addEventListener('click', () => {
+    $('ast-events-wrap').style.display = 'none'; pendingCalEvents = []; setStatus('');
   });
 
 })();
+
 </script>
 </body>
 </html>
