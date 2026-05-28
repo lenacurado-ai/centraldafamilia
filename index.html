@@ -1680,6 +1680,240 @@ function toggleSection(id) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
+
+// ── ASSISTENTE DE VOZ (OpenAI only) ───────────────────────────
+(function () {
+
+  // ── UI ──
+  const btn = document.createElement('button');
+  btn.id = 'mic-btn';
+  btn.innerHTML = '🎙️';
+  btn.setAttribute('aria-label', 'Assistente de voz');
+  btn.style.cssText = `
+    position:fixed;bottom:24px;right:20px;z-index:1000;
+    width:58px;height:58px;border-radius:50%;border:none;
+    background:#7c3aed;color:#fff;font-size:24px;
+    box-shadow:0 4px 18px rgba(124,58,237,.45);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:transform .15s,background .15s;
+  `;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'voice-overlay';
+  overlay.style.cssText = `
+    display:none;position:fixed;inset:0;z-index:999;
+    background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+    align-items:flex-end;justify-content:center;padding:0 0 96px;
+  `;
+
+  const panel = document.createElement('div');
+  panel.style.cssText = `
+    background:#fff;border-radius:20px;padding:20px;
+    width:min(94vw,480px);max-height:72vh;overflow-y:auto;
+    box-shadow:0 8px 40px rgba(0,0,0,.18);
+  `;
+  panel.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-weight:700;font-size:15px;">Assistente de voz 🎙️</span>
+      <button id="voice-close" style="border:none;background:none;font-size:20px;cursor:pointer;color:#666;">✕</button>
+    </div>
+    <div id="voice-status" style="font-size:13px;color:#7c3aed;margin-bottom:10px;min-height:18px;">
+      Toque em Falar e faça sua pergunta ou pedido.
+    </div>
+    <div id="voice-transcript" style="
+      font-size:13px;color:#6b6b6b;background:#f5f5f0;
+      border-radius:10px;padding:10px 12px;margin-bottom:10px;display:none;
+    "></div>
+    <div id="voice-answer" style="
+      font-size:14px;line-height:1.65;display:none;
+      border-top:1px solid #e8e8e4;padding-top:12px;margin-top:4px;
+    "></div>
+    <div id="voice-action-badge" style="
+      display:none;margin-top:10px;padding:8px 12px;border-radius:10px;
+      background:#ecfdf5;border:1px solid #6ee7b7;font-size:12px;color:#059669;
+    "></div>
+    <button id="voice-record-btn" style="
+      width:100%;margin-top:16px;padding:13px;border-radius:12px;border:none;
+      background:#7c3aed;color:#fff;font-size:15px;font-weight:600;cursor:pointer;
+    ">🎙️ Falar</button>
+  `;
+
+  overlay.appendChild(panel);
+  document.body.appendChild(btn);
+  document.body.appendChild(overlay);
+
+  // ── Estado ──
+  let isRecording = false;
+  let mediaRecorder = null;
+  let audioChunks = [];
+
+  // ── Helpers de UI ──
+  const $ = id => document.getElementById(id);
+  function setStatus(msg, color) {
+    const el = $('voice-status');
+    el.textContent = msg;
+    el.style.color = color || '#7c3aed';
+  }
+  function setRecordBtn(recording) {
+    const b = $('voice-record-btn');
+    if (!b) return;
+    b.textContent = recording ? '⏹ Parar' : '🎙️ Falar';
+    b.style.background = recording ? '#dc2626' : '#7c3aed';
+  }
+  function openPanel() {
+    overlay.style.display = 'flex';
+    $('voice-transcript').style.display = 'none';
+    $('voice-answer').style.display = 'none';
+    $('voice-action-badge').style.display = 'none';
+    setStatus('Toque em Falar e faça sua pergunta ou pedido.');
+  }
+  function closePanel() {
+    overlay.style.display = 'none';
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    isRecording = false;
+    setRecordBtn(false);
+  }
+
+  // ── Executa ações no portal via localStorage ──
+  function executeAction(action) {
+    if (!action || action.type === 'none' || !action.type) return;
+    const badge = $('voice-action-badge');
+    const today = new Date().toISOString().split('T')[0];
+
+    if (action.type === 'add_task') {
+      const person = action.person || 'familia';
+      const key = 'familia-tasks-' + person;
+      const tasks = JSON.parse(localStorage.getItem(key) || '[]');
+      tasks.unshift({ id: Date.now(), text: action.title || action.details, done: false, date: today });
+      localStorage.setItem(key, JSON.stringify(tasks));
+      badge.textContent = '✅ Tarefa adicionada: ' + (action.title || '');
+      badge.style.display = 'block';
+      if (typeof window.renderTasks === 'function') window.renderTasks(person);
+      return;
+    }
+
+    if (action.type === 'complete_task') {
+      const needle = (action.title || action.details || '').toLowerCase();
+      ['iara', 'caique', 'familia'].forEach(p => {
+        const key = 'familia-tasks-' + p;
+        const tasks = JSON.parse(localStorage.getItem(key) || '[]');
+        let changed = false;
+        tasks.forEach(t => { if (t.text.toLowerCase().includes(needle)) { t.done = true; changed = true; } });
+        if (changed) {
+          localStorage.setItem(key, JSON.stringify(tasks));
+          if (typeof window.renderTasks === 'function') window.renderTasks(p);
+        }
+      });
+      badge.textContent = '✅ Tarefa marcada como concluída!';
+      badge.style.display = 'block';
+      return;
+    }
+
+    if (action.type === 'add_note') {
+      const person = action.person || 'geral';
+      const key = 'familia-notes-' + person;
+      const notes = JSON.parse(localStorage.getItem(key) || '[]');
+      notes.unshift({ id: Date.now(), text: action.details || action.title, date: today });
+      localStorage.setItem(key, JSON.stringify(notes));
+      badge.textContent = '📝 Anotação salva!';
+      badge.style.display = 'block';
+      return;
+    }
+  }
+
+  // ── Envia áudio para /api/voice ──
+  async function sendToVoiceAPI(base64, mimeType) {
+    setStatus('⏳ Transcrevendo e interpretando...');
+    try {
+      const res = await fetch('/api/voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audio: base64, mimeType })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Erro ' + res.status);
+      }
+      const data = await res.json();
+
+      // Transcrição
+      if (data.transcript) {
+        const t = $('voice-transcript');
+        t.textContent = '🗣️ "' + data.transcript + '"';
+        t.style.display = 'block';
+      }
+
+      // Resposta
+      if (data.reply) {
+        const a = $('voice-answer');
+        a.innerHTML = data.reply.replace(/\n/g, '<br>');
+        a.style.display = 'block';
+      }
+
+      setStatus('✅ Pronto', '#059669');
+
+      // Ação no portal
+      if (data.action && data.action.type !== 'none') {
+        executeAction(data.action);
+      }
+
+    } catch (e) {
+      setStatus('❌ ' + e.message, '#dc2626');
+    }
+  }
+
+  // ── Gravação com MediaRecorder ──
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = ['audio/webm', 'audio/mp4', 'audio/ogg']
+        .find(t => MediaRecorder.isTypeSupported(t)) || '';
+      mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        const usedType = mediaRecorder.mimeType || mimeType || 'audio/webm';
+        const blob = new Blob(audioChunks, { type: usedType });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result.split(',')[1];
+          sendToVoiceAPI(base64, usedType);
+        };
+        reader.readAsDataURL(blob);
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      setRecordBtn(true);
+      setStatus('🔴 Gravando… toque em Parar quando terminar.');
+    } catch (e) {
+      setStatus('❌ Permissão de microfone negada.', '#dc2626');
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      isRecording = false;
+      setRecordBtn(false);
+      setStatus('⏳ Processando…');
+    }
+  }
+
+  // ── Listeners ──
+  btn.addEventListener('click', openPanel);
+  document.addEventListener('click', e => {
+    if (e.target.id === 'voice-close') closePanel();
+    if (e.target.id === 'voice-record-btn') {
+      if (isRecording) stopRecording(); else startRecording();
+    }
+  });
+  overlay.addEventListener('click', e => { if (e.target === overlay) closePanel(); });
+
+})();
 </script>
 </body>
 </html>
