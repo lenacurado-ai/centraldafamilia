@@ -1762,7 +1762,81 @@ window.syncNow = async function() {
 };
 
 // Sincroniza automaticamente ao abrir o portal
-window.addEventListener('load', () => setTimeout(syncNow, 1200));
+window.addEventListener('load', () => {
+  setTimeout(syncNow, 1200);
+  setTimeout(loadCalendar, 1800);
+});
+
+// ── CALENDÁRIO DINÂMICO ───────────────────────────────────────
+const CALENDAR_KEYWORDS = ['iara','caique','dentista','vacina','consulta',
+  'neurologista','terapia','pediatra','ortopedista','pf','passaporte','escola'];
+
+function eventMatchesFamily(ev) {
+  const text = (ev.title + ' ' + (ev.description || '') + ' ' + (ev.location || '')).toLowerCase();
+  return CALENDAR_KEYWORDS.some(k => text.includes(k));
+}
+
+function formatEventDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  const today = new Date();
+  const diff = Math.floor((d - today) / 86400000);
+  const label = diff === 0 ? 'Hoje' : diff === 1 ? 'Amanhã'
+    : d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+  const time = dateStr.includes('T')
+    ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+  return label + (time ? ' às ' + time : '');
+}
+
+function personTag(ev) {
+  const text = (ev.title + ' ' + (ev.description || '')).toLowerCase();
+  if (text.includes('iara')) return '<span style="background:#f3effe;color:#7c3aed;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:600;">Iara</span>';
+  if (text.includes('caique')) return '<span style="background:#eff8ff;color:#0369a1;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:600;">Caique</span>';
+  return '';
+}
+
+async function loadCalendar() {
+  const listEl = document.querySelector('.agenda-list');
+  if (!listEl) return;
+
+  try {
+    const res = await fetch('/api/calendar');
+    if (!res.ok) throw new Error('Erro ' + res.status);
+    const { events } = await res.json();
+
+    const family = events.filter(eventMatchesFamily);
+    const all = family.length ? family : events.slice(0, 10);
+
+    if (!all.length) {
+      listEl.innerHTML = '<div style="padding:14px 0;font-size:13px;color:#6b6b6b;">Nenhum evento nos próximos 60 dias.</div>';
+      return;
+    }
+
+    listEl.innerHTML = all.map(ev => `
+      <div class="agenda-item">
+        <div class="agenda-dot" style="background:#7c3aed;margin-top:4px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            ${ev.title} ${personTag(ev)}
+          </div>
+          <div style="font-size:12px;color:#6b6b6b;margin-top:2px;">
+            📅 ${formatEventDate(ev.start)}
+            ${ev.location ? '· 📍 ' + ev.location : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Atualiza badge "ao vivo"
+    const liveEl = document.querySelector('.agenda-live');
+    if (liveEl) liveEl.textContent = '● ' + all.length + ' eventos';
+
+  } catch (e) {
+    const liveEl = document.querySelector('.agenda-live');
+    if (liveEl) { liveEl.textContent = '⚠ offline'; liveEl.style.color = '#d97706'; }
+  }
+}
 
 // ── ASSISTENTE DE VOZ (OpenAI only) ───────────────────────────
 (function () {
