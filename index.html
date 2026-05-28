@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17463a" />
+    <title>Central da Familia</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar" aria-label="Resumo">
+        <div>
+          <p class="eyebrow">Central da Familia</p>
+          <h1>Fale o que precisa resolver</h1>
+        </div>
+        <div class="status" id="connectionStatus">Pronto</div>
+      </section>
+
+      <section class="command-panel" aria-label="Comando por voz">
+        <button class="mic-button" id="recordButton" type="button" aria-label="Gravar audio">
+          <span class="mic-icon" aria-hidden="true"></span>
+        </button>
+        <p id="recordingLabel">Toque para gravar</p>
+        <output id="transcriptOutput" class="transcript" aria-live="polite">
+          Exemplos: agendar medico, anotar algo, criar conteudo ou buscar arquivo.
+        </output>
+      </section>
+
+      <section class="quick-actions" aria-label="Acoes rapidas">
+        <button type="button" data-example="Agendar cardiologista para terça de manhã">Agendar medico</button>
+        <button type="button" data-example="Anotar que o exame de sangue ficou pronto">Anotar</button>
+        <button type="button" data-example="Criar conteudo sobre rotina de cuidados da familia">Criar conteudo</button>
+        <button type="button" data-example="Buscar arquivo do plano de saude no Drive">Buscar arquivo</button>
+      </section>
+
+      <section class="results" aria-label="Ultimas solicitacoes">
+        <div class="section-heading">
+          <h2>Ultimas solicitacoes</h2>
+          <button id="clearHistory" type="button">Limpar</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
