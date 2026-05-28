@@ -1,49 +1,1685 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#17463a" />
-    <title>Central da Familia</title>
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
-  <body>
-    <main class="shell">
-      <section class="topbar" aria-label="Resumo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Central da Família — Iara & Caique</title>
+
+<!-- PWA -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Família">
+<meta name="theme-color" content="#7c3aed">
+<link rel="manifest" href="manifest.json">
+
+<!-- Ícone para home screen (iOS usa apple-touch-icon) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%237c3aed'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle'%3E🏠%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #f5f5f0;
+  --surface: #ffffff;
+  --border: #e8e8e4;
+  --text: #1a1a1a;
+  --text-2: #6b6b6b;
+  --iara: #7c3aed;
+  --iara-light: #f3effe;
+  --iara-border: #c4b5fd;
+  --caique: #0369a1;
+  --caique-light: #eff8ff;
+  --caique-border: #7dd3fc;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --red-border: #fca5a5;
+  --orange: #d97706;
+  --orange-light: #fffbeb;
+  --orange-border: #fcd34d;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --green-border: #6ee7b7;
+  --blue: #2563eb;
+  --blue-light: #eff6ff;
+  --blue-border: #93c5fd;
+  --escola: #0891b2;
+  --escola-light: #ecfeff;
+  --escola-border: #a5f3fc;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 20px 60px;
+}
+
+/* ── Header ── */
+header {
+  max-width: 1100px; margin: 0 auto 22px;
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.header-title h1 { font-size: 21px; font-weight: 700; letter-spacing: -0.3px; }
+.header-title p { font-size: 12.5px; color: var(--text-2); margin-top: 2px; }
+.last-updated {
+  font-size: 12px; color: var(--text-2);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 14px;
+}
+
+/* ── Agenda ── */
+.agenda-section {
+  max-width: 1100px; margin: 0 auto 18px;
+  background: var(--surface); border-radius: 14px;
+  border: 1px solid var(--green-border); overflow: hidden;
+}
+.agenda-header {
+  padding: 14px 20px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.agenda-header h3 { font-size: 14px; font-weight: 700; }
+.agenda-header p { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.agenda-live {
+  font-size: 11px; background: var(--green-light);
+  border: 1px solid var(--green-border); color: var(--green);
+  border-radius: 20px; padding: 3px 12px; white-space: nowrap;
+}
+.agenda-list { padding: 0 20px; }
+.agenda-item {
+  display: flex; gap: 14px; padding: 11px 0;
+  border-bottom: 1px solid var(--border); align-items: flex-start;
+}
+.agenda-item:last-child { border-bottom: none; }
+.agenda-date-box {
+  width: 46px; flex-shrink: 0; text-align: center;
+  background: var(--bg); border-radius: 9px; padding: 5px 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.agenda-date-box .dow { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-2); }
+.agenda-date-box .day { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1.1; }
+.agenda-date-box .mon { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--text-2); }
+.agenda-date-box.hot { background: var(--red-light); border: 1px solid var(--red-border); }
+.agenda-date-box.hot .day { color: var(--red); }
+.agenda-date-box.hot .dow, .agenda-date-box.hot .mon { color: #f87171; }
+.agenda-info { flex: 1; }
+.agenda-title { font-size: 13.5px; font-weight: 600; }
+.agenda-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; line-height: 1.4; }
+.agenda-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+.a-tag {
+  font-size: 10.5px; font-weight: 700; border-radius: 4px;
+  padding: 2px 8px; display: inline-block;
+}
+.a-iara { background: var(--iara-light); color: var(--iara); }
+.a-caique { background: var(--caique-light); color: var(--caique); }
+.a-escola { background: var(--escola-light); color: var(--escola); }
+.a-ambos { background: var(--green-light); color: var(--green); }
+
+/* ── Urgent Banner ── */
+.urgent-banner {
+  max-width: 1100px; margin: 0 auto 18px;
+  border-radius: 12px; padding: 14px 18px;
+}
+.urgent-banner.red { background: var(--red-light); border: 1px solid var(--red-border); }
+.urgent-banner h3 {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 10px;
+}
+.urgent-banner.red h3 { color: var(--red); }
+.urgent-items { display: flex; flex-wrap: wrap; gap: 8px; }
+.urgent-tag {
+  display: flex; align-items: center; gap: 6px;
+  background: white; border-radius: 6px; padding: 6px 12px;
+  font-size: 12.5px; font-weight: 500;
+}
+.urgent-tag.r { border: 1px solid var(--red-border); color: var(--red); }
+.urgent-tag.o { border: 1px solid var(--orange-border); color: var(--orange); }
+.urgent-tag.e { border: 1px solid var(--escola-border); color: var(--escola); }
+.urgent-tag .who {
+  font-weight: 700; font-size: 11px; color: white;
+  border-radius: 4px; padding: 1px 6px;
+}
+.urgent-tag.r .who { background: var(--red); }
+.urgent-tag.o .who { background: var(--orange); }
+.urgent-tag.e .who { background: var(--escola); }
+
+/* ── Collapsible sections ── */
+.collapsible-section {
+  max-width: 1100px; margin: 0 auto 12px;
+  background: var(--surface); border-radius: 14px;
+  border: 1px solid var(--border); overflow: hidden;
+}
+.collapsible-header {
+  width: 100%; display: flex; align-items: center;
+  padding: 16px 20px; background: var(--surface);
+  border: none; cursor: pointer; text-align: left; gap: 14px;
+}
+.collapsible-header:hover { background: var(--bg); }
+.c-title { flex-shrink: 0; }
+.c-title h3 { font-size: 15px; font-weight: 700; }
+.c-title p { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.c-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.c-chip {
+  font-size: 11px; padding: 2px 10px; border-radius: 20px;
+  border: 1px solid; font-weight: 500; white-space: nowrap;
+}
+.cc-red { background: var(--red-light); border-color: var(--red-border); color: var(--red); }
+.cc-orange { background: var(--orange-light); border-color: var(--orange-border); color: var(--orange); }
+.cc-green { background: var(--green-light); border-color: var(--green-border); color: var(--green); }
+.cc-blue { background: var(--blue-light); border-color: var(--blue-border); color: var(--blue); }
+.cc-escola { background: var(--escola-light); border-color: var(--escola-border); color: var(--escola); }
+.cc-purple { background: var(--iara-light); border-color: var(--iara-border); color: var(--iara); }
+.cc-gray { background: var(--bg); border-color: var(--border); color: var(--text-2); }
+.c-arrow {
+  font-size: 13px; color: var(--text-2); flex-shrink: 0;
+  transition: transform 0.2s; display: inline-block;
+}
+.c-arrow.open { transform: rotate(180deg); }
+.collapsible-body { display: none; border-top: 1px solid var(--border); }
+.collapsible-body.open { display: block; }
+
+/* ── Section divider ── */
+.sec-divider {
+  max-width: 1100px; margin: 28px auto 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sec-divider .line { flex: 1; height: 1px; background: var(--border); }
+.sec-divider span {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--text-2);
+}
+
+/* ── Child Cards (inside collapsible) ── */
+.main-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px;
+}
+@media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } }
+.child-card { background: var(--bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+.child-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.iara .avatar { background: var(--iara-light); }
+.caique .avatar { background: var(--caique-light); }
+.child-meta h2 { font-size: 17px; font-weight: 700; }
+.iara .child-meta h2 { color: var(--iara); }
+.caique .child-meta h2 { color: var(--caique); }
+.child-meta p { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.child-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 16px; }
+.section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-2); margin-bottom: 7px; }
+.med-item { display: flex; align-items: center; gap: 10px; background: var(--surface); border-radius: 8px; padding: 9px 12px; border: 1px solid var(--border); }
+.med-icon { font-size: 17px; }
+.med-name { font-size: 13px; font-weight: 600; }
+.med-detail { font-size: 11.5px; color: var(--text-2); margin-top: 1px; }
+.followup-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.followup-item:last-child { border-bottom: none; }
+.followup-icon { font-size: 17px; flex-shrink: 0; }
+.followup-content { flex: 1; }
+.followup-title { font-size: 13px; font-weight: 600; }
+.followup-sub { font-size: 11px; color: var(--text-2); margin-top: 1px; }
+.status-badge { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 7px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; flex-shrink: 0; }
+.badge-active { background: var(--iara-light); color: var(--iara); }
+.badge-urgent { background: var(--red-light); color: var(--red); }
+.badge-done { background: var(--green-light); color: var(--green); }
+.badge-pending { background: var(--orange-light); color: var(--orange); }
+.badge-routine { background: var(--bg); color: var(--text-2); border: 1px solid var(--border); }
+
+/* ── Appointments (inside saúde) ── */
+.appt-header { padding: 14px 20px 10px; border-top: 1px solid var(--border); }
+.appt-header h4 { font-size: 13px; font-weight: 700; }
+.appt-header p { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
+.appt-list { padding: 0 20px 16px; display: flex; flex-direction: column; gap: 8px; }
+.appt-item { display: flex; align-items: center; gap: 12px; background: var(--bg); border-radius: 9px; padding: 10px 12px; border: 1px solid var(--border); }
+.appt-date { background: var(--iara-light); border-radius: 7px; padding: 4px 6px; text-align: center; min-width: 44px; display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: 700; }
+.iara-date { background: var(--iara-light); color: var(--iara); }
+.caique-date { background: var(--caique-light); color: var(--caique); }
+.appt-date .day { font-size: 19px; font-weight: 800; line-height: 1.1; }
+.appt-details { flex: 1; }
+.appt-title { font-size: 13px; font-weight: 600; }
+.appt-sub { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
+.who-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
+.iara-badge { background: var(--iara-light); color: var(--iara); }
+.caique-badge { background: var(--caique-light); color: var(--caique); }
+
+/* ── Vaccines (inside collapsible) ── */
+.vaccine-wrap { padding: 20px; }
+.vaccine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .vaccine-grid { grid-template-columns: 1fr; } }
+.vaccine-child h4 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+.iara-vc h4 { color: var(--iara); }
+.caique-vc h4 { color: var(--caique); }
+.vaccine-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.vaccine-table th { background: var(--bg); padding: 6px 8px; text-align: left; font-size: 10.5px; color: var(--text-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid var(--border); }
+.vaccine-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
+.vaccine-table tr:last-child td { border-bottom: none; }
+.v-done { color: var(--green); font-weight: 600; }
+.v-missing { color: var(--red); font-weight: 600; }
+.v-pending { color: var(--orange); font-weight: 600; }
+
+/* ── Notes ── */
+.notes-wrap { padding: 20px; }
+.notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 700px) { .notes-grid { grid-template-columns: 1fr; } }
+.notes-child h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.iara-notes h4 { color: var(--iara); }
+.caique-notes h4 { color: var(--caique); }
+.note-textarea { width: 100%; height: 90px; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 12.5px; font-family: inherit; resize: vertical; outline: none; background: var(--bg); color: var(--text); }
+.note-textarea:focus { border-color: var(--iara); }
+
+/* ── Escola ── */
+.escola-wrap { padding: 20px; }
+.escola-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 760px) { .escola-grid { grid-template-columns: 1fr; } }
+.escola-block-title { font-size: 13px; font-weight: 700; color: var(--escola); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.roda-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.roda-table th { background: var(--bg); padding: 7px 10px; text-align: left; font-size: 10.5px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid var(--border); }
+.roda-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 12.5px; }
+.roda-table tr:last-child td { border-bottom: none; }
+.roda-past td { opacity: 0.45; }
+.roda-next td { background: var(--escola-light) !important; font-weight: 700; }
+.roda-iara td { background: var(--iara-light); }
+.roda-todos td { background: var(--green-light); }
+.next-badge { display: inline-block; font-size: 10px; font-weight: 700; background: var(--escola); color: white; border-radius: 4px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; }
+.iara-badge-sm { display: inline-block; font-size: 10px; font-weight: 700; background: var(--iara-light); color: var(--iara); border-radius: 4px; padding: 1px 6px; }
+.todos-badge { display: inline-block; font-size: 10px; font-weight: 700; background: var(--green-light); color: var(--green); border-radius: 4px; padding: 1px 6px; }
+.recados-empty { text-align: center; padding: 32px 20px; color: var(--text-2); }
+.recados-empty p { font-size: 13px; margin-top: 8px; }
+
+/* ── Documents ── */
+.docs-wrap { padding: 20px; }
+.docs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 700px) { .docs-grid { grid-template-columns: 1fr; } }
+
+/* ── Family activities ── */
+.fam-filter { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; font-size: 12px; font-weight: 500; color: var(--text-2); cursor: pointer; transition: all 0.15s; }
+.fam-filter:hover { border-color: #16a34a; color: #16a34a; }
+.fam-filter.active { background: #16a34a; border-color: #16a34a; color: white; font-weight: 600; }
+.act-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow 0.15s; }
+.act-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.act-card-top { padding: 14px 16px 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.act-card-name { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.act-card-meta { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 16px 10px; }
+.act-badge { font-size: 11px; font-weight: 500; border-radius: 20px; padding: 2px 9px; border: 1px solid; }
+.badge-tipo { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+.badge-indoor { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+.badge-outdoor { background: #fefce8; border-color: #fef08a; color: #854d0e; }
+.badge-ambos { background: #fdf4ff; border-color: #e9d5ff; color: #6b21a8; }
+.badge-kids { background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
+.act-card-info { padding: 0 16px 10px; display: flex; flex-direction: column; gap: 4px; }
+.act-info-row { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+.act-info-row a { color: #2563eb; text-decoration: none; font-size: 12px; }
+.act-info-row a:hover { text-decoration: underline; }
+.act-card-footer { margin-top: auto; padding: 10px 16px 12px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.act-status-select { font-size: 11.5px; font-weight: 600; border-radius: 6px; padding: 4px 8px; border: 1px solid var(--border); cursor: pointer; background: var(--surface); color: var(--text); }
+.btn-fds { background: #16a34a; color: white; border: none; border-radius: 7px; padding: 5px 12px; font-size: 11.5px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.btn-fds:hover { background: #15803d; }
+.btn-delete { background: none; border: none; font-size: 14px; cursor: pointer; color: var(--text-2); opacity: 0.5; padding: 2px 4px; border-radius: 4px; }
+.btn-delete:hover { opacity: 1; color: var(--red); }
+.fam-form-field { display: flex; flex-direction: column; gap: 4px; }
+.fam-form-field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-2); }
+.fam-form-field input, .fam-form-field select { border: 1px solid var(--border); border-radius: 7px; padding: 8px 11px; font-size: 13px; color: var(--text); background: var(--surface); font-family: inherit; outline: none; transition: border-color 0.15s; }
+.fam-form-field input:focus, .fam-form-field select:focus { border-color: #16a34a; }
+
+@media (max-width: 700px) {
+  body { padding: 14px 12px 60px; }
+  .c-chips { display: none; }
+}
+
+/* ── Docs list ── */
+.docs-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+.doc-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px;
+  text-decoration: none; color: inherit;
+  transition: box-shadow 0.15s;
+}
+.doc-row:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.07); border-color: var(--iara-border); }
+.doc-icon { font-size: 22px; flex-shrink: 0; }
+.doc-info { flex: 1; }
+.doc-title { font-size: 13px; font-weight: 700; }
+.doc-meta { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+.doc-badge {
+  font-size: 10px; font-weight: 700; border-radius: 4px;
+  padding: 2px 8px; white-space: nowrap; flex-shrink: 0;
+}
+.doc-btn {
+  font-size: 11px; font-weight: 600; border-radius: 6px;
+  padding: 5px 12px; background: var(--iara-light);
+  color: var(--iara); border: 1px solid var(--iara-border);
+  text-decoration: none; white-space: nowrap; flex-shrink: 0;
+  cursor: pointer;
+}
+.doc-btn:hover { background: var(--iara); color: white; }
+.doc-btn.blue { background: var(--caique-light); color: var(--caique); border-color: var(--caique-border); }
+.doc-btn.blue:hover { background: var(--caique); color: white; }
+.doc-drive-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px; border-radius: 8px;
+  font-size: 12.5px; font-weight: 600; text-decoration: none;
+  border: 1px solid; transition: opacity 0.15s;
+}
+.doc-drive-link:hover { opacity: 0.8; }
+
+/* ── Illness Diary ── */
+.diary-wrap { padding: 20px; }
+.diary-episode { background: var(--bg); border-radius: 10px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
+.diary-ep-header { padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.diary-ep-who { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
+.diary-ep-iara { background: var(--iara-light); color: var(--iara); }
+.diary-ep-caique { background: var(--caique-light); color: var(--caique); }
+.diary-ep-title { font-size: 13.5px; font-weight: 700; flex: 1; }
+.diary-ep-status { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
+.diary-status-active { background: var(--red-light); color: var(--red); border: 1px solid var(--red-border); }
+.diary-status-done { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+.diary-timeline { padding: 4px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+.diary-event { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; }
+.diary-event-date { min-width: 52px; font-size: 11px; color: var(--text-2); font-weight: 600; padding-top: 1px; white-space: nowrap; }
+.diary-event-desc { color: var(--text); line-height: 1.45; }
+
+/* ── Birthdays ── */
+.bday-wrap { padding: 20px; }
+.bday-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.bday-item:last-child { border-bottom: none; }
+.bday-date-box { width: 54px; text-align: center; background: var(--bg); border-radius: 9px; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 1px; flex-shrink: 0; border: 1px solid var(--border); }
+.bday-date-box .day { font-size: 22px; font-weight: 800; line-height: 1.1; }
+.bday-date-box .mon { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--text-2); }
+.bday-soon { background: #fef9c3; border-color: #fde047; }
+.bday-soon .day { color: #854d0e; }
+.bday-info { flex: 1; }
+.bday-name { font-size: 14px; font-weight: 700; }
+.bday-sub { font-size: 11.5px; color: var(--text-2); margin-top: 2px; margin-bottom: 8px; }
+.gift-checklist { display: flex; flex-direction: column; gap: 4px; margin-bottom: 7px; }
+.gift-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 6px 10px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); cursor: pointer; }
+.gift-item input[type=checkbox] { width: 15px; height: 15px; accent-color: #16a34a; cursor: pointer; flex-shrink: 0; }
+.gift-item.done span { text-decoration: line-through; color: var(--text-2); }
+.gift-add-row { display: flex; gap: 7px; }
+.gift-add-input { flex: 1; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-family: inherit; outline: none; background: var(--bg); }
+.gift-add-input:focus { border-color: #16a34a; }
+.gift-add-btn { background: #16a34a; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+/* ── Growth ── */
+.growth-wrap { padding: 20px; }
+.growth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 700px) { .growth-grid { grid-template-columns: 1fr; } }
+.growth-child { background: var(--bg); border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
+.growth-child-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.growth-latest { padding: 12px 14px; display: flex; gap: 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.growth-stat { text-align: center; flex: 1; }
+.growth-stat .val { font-size: 22px; font-weight: 800; }
+.growth-stat .lbl { font-size: 10px; color: var(--text-2); font-weight: 600; text-transform: uppercase; margin-top: 1px; }
+.growth-stat .dt { font-size: 10px; color: var(--text-2); margin-top: 1px; }
+.growth-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.growth-table th { background: var(--border); padding: 5px 10px; text-align: left; font-size: 10px; color: var(--text-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+.growth-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.growth-table tr:last-child td { border-bottom: none; }
+.growth-add-form { padding: 10px 14px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 7px; align-items: flex-end; flex-wrap: wrap; }
+.growth-add-form input { border: 1px solid var(--border); border-radius: 6px; padding: 6px 9px; font-size: 12px; font-family: inherit; outline: none; }
+.growth-add-form input:focus { border-color: var(--iara); }
+.growth-field-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-2); display: block; margin-bottom: 3px; letter-spacing: 0.3px; }
+.growth-add-btn { border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header>
+  <div class="header-title">
+    <h1>🏠 Central da Família</h1>
+    <p>Iara & Caique Correa Curado · Vila Romana, São Paulo</p>
+  </div>
+  <div class="last-updated">Atualizado em 28/05/2026</div>
+</header>
+
+<!-- ══════════════════ AGENDA ══════════════════ -->
+<div class="agenda-section">
+  <div class="agenda-header">
+    <div>
+      <h3>📅 Próximos 14 dias</h3>
+      <p>Agenda confirmada · Google Calendar</p>
+    </div>
+    <span class="agenda-live">● Sincronizado</span>
+  </div>
+  <div class="agenda-list">
+
+    <div class="agenda-item">
+      <div class="agenda-date-box hot">
+        <span class="dow">SAB</span>
+        <span class="day">30</span>
+        <span class="mon">MAI</span>
+      </div>
+      <div class="agenda-info">
+        <div class="agenda-title">🎂 Aniversário Dona Maria</div>
+        <div class="agenda-sub">13h–17h · Aniversário confirmado no calendário</div>
+        <div class="agenda-tags"><span class="a-tag" style="background:#fef9c3;color:#854d0e;">Família</span></div>
+      </div>
+    </div>
+
+    <div class="agenda-item">
+      <div class="agenda-date-box hot">
+        <span class="dow">SEG</span>
+        <span class="day">01</span>
+        <span class="mon">JUN</span>
+      </div>
+      <div class="agenda-info">
+        <div class="agenda-title">🍌 Roda Sabores — fruta AMARELA</div>
+        <div class="agenda-sub">Escola Almanaque · Mandar 1 fruta amarela na mochila (banana, manga, abacaxi…)</div>
+        <div class="agenda-tags"><span class="a-tag a-escola">Escola Iara</span></div>
+      </div>
+    </div>
+
+    <div class="agenda-item">
+      <div class="agenda-date-box">
+        <span class="dow">TER</span>
+        <span class="day">02</span>
+        <span class="mon">JUN</span>
+      </div>
+      <div class="agenda-info">
+        <div class="agenda-title">Terapia Ocupacional</div>
+        <div class="agenda-sub">09h · R. Turiassu 519, cj 94 — Perdizes · sessões semanais até ago/2026</div>
+        <div class="agenda-tags"><span class="a-tag a-iara">Iara</span></div>
+      </div>
+    </div>
+
+    <div class="agenda-item">
+      <div class="agenda-date-box">
+        <span class="dow">SEG</span>
+        <span class="day">08</span>
+        <span class="mon">JUN</span>
+      </div>
+      <div class="agenda-info">
+        <div class="agenda-title">🥦 Roda Sabores — fruta VERDE</div>
+        <div class="agenda-sub">Escola Almanaque · Mandar 1 fruta verde na mochila (uva, kiwi, maçã verde…)</div>
+        <div class="agenda-tags"><span class="a-tag a-escola">Escola Iara</span></div>
+      </div>
+    </div>
+
+    <div class="agenda-item">
+      <div class="agenda-date-box">
+        <span class="dow">TER</span>
+        <span class="day">09</span>
+        <span class="mon">JUN</span>
+      </div>
+      <div class="agenda-info">
+        <div class="agenda-title">TO + Neurologista</div>
+        <div class="agenda-sub">TO 9h (Perdizes) · Dra. Juliana Gaigher — teleconsulta 13h · (11) 2367-8850</div>
+        <div class="agenda-tags"><span class="a-tag a-iara">Iara</span></div>
+      </div>
+    </div>
+
+    <div class="agenda-item">
+      <div class="agenda-date-box">
+        <span class="dow">SEX</span>
+        <span class="day">12</span>
+        <span class="mon">JUN</span>
+      </div>
+      <div class="agenda-info">
+        <div class="agenda-title">🎂 Aniversário da Tete — 7 anos (Nina)</div>
+        <div class="agenda-sub">16h–20h · Aniversário confirmado no calendário</div>
+        <div class="agenda-tags"><span class="a-tag" style="background:#fef9c3;color:#854d0e;">Família</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════ ANIVERSÁRIOS ══════════════════ -->
+<div class="agenda-section" style="border-color:#fde68a;">
+  <div class="agenda-header" style="cursor:pointer;" onclick="toggleSection('aniversarios')">
+    <div>
+      <h3>🎂 Próximos aniversários</h3>
+      <p>Google Calendar · checklist de presentes</p>
+    </div>
+    <span class="c-arrow" id="arrow-aniversarios" style="font-size:13px;color:var(--text-2);transition:transform 0.2s;">▾</span>
+  </div>
+  <div id="content-aniversarios" class="collapsible-body open">
+    <div class="bday-wrap" id="bday-wrap" style="padding:0 20px 4px;"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ URGENTES ══════════════════ -->
+<div class="urgent-banner red">
+  <h3>⚡ Ações urgentes</h3>
+  <div class="urgent-items">
+    <div class="urgent-tag e"><span class="who">ESCOLA</span>Seg 01/jun — fruta AMARELA 🍌</div>
+    <div class="urgent-tag o"><span class="who">PASSAPORTE</span>📅 Agendado 21/jul — West Plaza 10h55 · Caique foto 5x7!</div>
+    <div class="urgent-tag o"><span class="who">IARA</span>Gripe 2026 — tomar em mai/jun</div>
+    <div class="urgent-tag o"><span class="who">IARA</span>Remarcar dentista (aparelho noturno)</div>
+    <div class="urgent-tag o"><span class="who">IARA</span>Pedir exame de ferro</div>
+    <div class="urgent-tag o"><span class="who">IARA</span>Agendar dermatologista — alergia</div>
+    <div class="urgent-tag o"><span class="who">CAIQUE</span>Agendar ortopedista — pisada torta</div>
+    <div class="urgent-tag o"><span class="who">CAIQUE</span>Pediatra — checkup + exames</div>
+    <div class="urgent-tag o"><span class="who">CAIQUE</span>Iniciar nacionalidade PT — Consulado Paulista 726</div>
+    <div class="urgent-tag o"><span class="who">AMBOS</span>RG brasileiro — Poupatempo SP</div>
+  </div>
+</div>
+
+<!-- ══════════════════ ATIVIDADES ══════════════════ -->
+<div class="sec-divider"><div class="line"></div><span>Família & Fins de Semana</span><div class="line"></div></div>
+
+<div class="collapsible-section" style="margin-bottom:24px;">
+  <button class="collapsible-header" onclick="toggleSection('atividades')">
+    <div class="c-title">
+      <h3>🎉 Atividades em SP</h3>
+      <p>Lugares para fazer com as crianças</p>
+    </div>
+    <div class="c-chips" id="act-header-chips">
+      <span class="c-chip cc-gray" id="act-count-chip">—</span>
+    </div>
+    <span class="c-arrow" id="arrow-atividades">▾</span>
+  </button>
+  <div class="collapsible-body open" id="content-atividades">
+
+    <!-- ⭐ Destaque fim de semana -->
+    <div id="fds-destaque" style="display:none;padding:14px 20px 16px;background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);border-bottom:2px solid #6ee7b7;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#065f46;margin-bottom:10px;">⭐ Programado para este fim de semana</div>
+      <div id="fds-cards" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div style="padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <p style="font-size:12px;color:var(--text-2);"><span id="act-count"></span></p>
+      <button onclick="toggleAddForm()" id="add-btn" style="background:#16a34a;color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">＋ Adicionar</button>
+    </div>
+
+    <!-- Filters -->
+    <div style="padding:12px 20px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+      <button class="fam-filter active" onclick="setFilter('all',this)">Todos</button>
+      <button class="fam-filter" onclick="setFilter('Restaurante',this)">🍽️ Restaurante</button>
+      <button class="fam-filter" onclick="setFilter('Parque',this)">🌳 Parque</button>
+      <button class="fam-filter" onclick="setFilter('Museu',this)">🏛️ Museu</button>
+      <button class="fam-filter" onclick="setFilter('Show/Teatro',this)">🎭 Show</button>
+      <button class="fam-filter" onclick="setFilter('Oficina',this)">🎨 Oficina</button>
+      <button class="fam-filter" onclick="setFilter('Cinema',this)">🎬 Cinema</button>
+      <button class="fam-filter" onclick="setFilter('Parque Temático',this)">🎢 Temático</button>
+      <button class="fam-filter" onclick="setFilter('Fazenda',this)">🌾 Fazenda</button>
+      <button class="fam-filter" onclick="setFilter('Passeio',this)">🗺️ Passeio</button>
+      <button class="fam-filter" onclick="setFilter('Zoo',this)">🦁 Zoo</button>
+      <button class="fam-filter" onclick="setFilter('Loja',this)">🛒 Loja</button>
+      <button class="fam-filter" onclick="setFilter('Outro',this)">✨ Outro</button>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
+      <button class="fam-filter" onclick="setFilter('indoor',this)">🏠 Indoor</button>
+      <button class="fam-filter" onclick="setFilter('outdoor',this)">☀️ Outdoor</button>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
+      <button class="fam-filter" onclick="setFilter('quero',this)">🤍 Quero ir</button>
+      <button class="fam-filter" onclick="setFilter('agendado',this)">📅 Agendado fds</button>
+      <button class="fam-filter" onclick="setFilter('feito',this)">✅ Já fui</button>
+    </div>
+
+    <!-- Add form + grid -->
+    <div style="padding:12px 20px 20px;">
+      <div id="add-form" style="display:none;background:white;border:2px solid #16a34a;border-radius:12px;padding:20px;margin-bottom:18px;">
+        <h4 style="font-size:13px;font-weight:700;color:#16a34a;margin-bottom:14px;">Nova atividade</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="fam-form-field" style="grid-column:span 2;"><label>Nome *</label><input id="f-nome" type="text" placeholder="Ex: Catavento Cultural"/></div>
+          <div class="fam-form-field"><label>Tipo</label><select id="f-tipo"><option>Parque</option><option>Restaurante</option><option>Museu</option><option>Show/Teatro</option><option>Oficina</option><option>Cinema</option><option>Parque Temático</option><option>Fazenda</option><option>Passeio</option><option>Zoo</option><option>Loja</option><option>Shopping</option><option>Outro</option></select></div>
+          <div class="fam-form-field"><label>Ambiente</label><select id="f-env"><option value="indoor">🏠 Indoor</option><option value="outdoor">☀️ Outdoor</option><option value="ambos">🏠☀️ Ambos</option></select></div>
+          <div class="fam-form-field"><label>Distância de casa</label><input id="f-dist" type="text" placeholder="Ex: 20 min de carro"/></div>
+          <div class="fam-form-field"><label>Horário</label><input id="f-horas" type="text" placeholder="Ex: Ter–Dom 9h–17h"/></div>
+          <div class="fam-form-field" style="grid-column:span 2;"><label>Link (Instagram, Maps, site)</label><input id="f-link" type="url" placeholder="https://..."/></div>
+          <div class="fam-form-field"><label>Para quem?</label><select id="f-kids"><option value="ambos">👧🏻👦🏻 Iara + Caique</option><option value="iara">🌸 Só Iara</option><option value="caique">🦁 Só Caique</option></select></div>
+          <div class="fam-form-field"><label>Observação</label><input id="f-obs" type="text" placeholder="Ex: Reserva necessária"/></div>
+          <div class="fam-form-field"><label>💰 Preço adulto</label><input id="f-precoA" type="text" placeholder="Ex: R$ 30 / Grátis"/></div>
+          <div class="fam-form-field"><label>💰 Preço criança</label><input id="f-precoC" type="text" placeholder="Ex: R$ 15 / Grátis"/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button onclick="addActivity()" style="background:#16a34a;color:white;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;">Salvar</button>
+          <button onclick="toggleAddForm()" style="background:var(--bg);color:var(--text-2);border:1px solid var(--border);border-radius:7px;padding:8px 18px;font-size:13px;cursor:pointer;">Cancelar</button>
+        </div>
+      </div>
+
+      <div id="activities-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;"></div>
+      <div id="empty-state" style="display:none;text-align:center;padding:40px 20px;color:var(--text-2);">
+        <div style="font-size:40px;margin-bottom:12px;">🗓️</div>
+        <p style="font-size:14px;">Nenhuma atividade encontrada.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════ COLLAPSIBLE SECTIONS ══════════════════ -->
+<div class="sec-divider"><div class="line"></div><span>Detalhes & Referência</span><div class="line"></div></div>
+
+<!-- ── ESCOLA ── -->
+<div class="collapsible-section">
+  <button class="collapsible-header" onclick="toggleSection('escola')">
+    <div class="c-title">
+      <h3>🏫 Escola — Iara</h3>
+      <p>Almanaque · G5 · Grupo 1</p>
+    </div>
+    <div class="c-chips">
+      <span class="c-chip cc-escola">⭐ Próx. roda: 01/jun — fruta amarela</span>
+      <span class="c-chip cc-green">Junho: todos os itens ✓</span>
+    </div>
+    <span class="c-arrow" id="arrow-escola">▾</span>
+  </button>
+  <div class="collapsible-body" id="content-escola">
+    <div class="escola-wrap">
+      <div class="escola-grid">
+
+        <!-- Roda Sabores e Saberes -->
         <div>
-          <p class="eyebrow">Central da Familia</p>
-          <h1>Fale o que precisa resolver</h1>
+          <div class="escola-block-title">📋 Roda Sabores e Saberes — Maio/Junho 2026</div>
+          <div style="font-size:11.5px;color:var(--text-2);margin-bottom:10px;">Toda segunda-feira · Iara: <span class="iara-badge-sm">Grupo 1</span> · Levar item na mochila em saquinha plástica</div>
+          <table class="roda-table">
+            <thead>
+              <tr><th>Data</th><th>Item</th><th>Quem</th></tr>
+            </thead>
+            <tbody>
+              <!-- MAIO — passado -->
+              <tr class="roda-past"><td><strong>04/05</strong> ✅</td><td>1 Bouquet de mosquitinho (flor)</td><td><span class="iara-badge-sm">Grupo 1</span></td></tr>
+              <tr class="roda-past"><td><strong>11/05</strong> ✅</td><td>1 Begônia no vaso</td><td><span style="font-size:10px;color:var(--text-2);">Grupo 2</span></td></tr>
+              <tr class="roda-past roda-iara"><td><strong>18/05</strong> ✅</td><td>1 Gérbera</td><td><span class="iara-badge-sm">Grupo 1</span></td></tr>
+              <tr class="roda-past"><td><strong>18/05</strong> ✅</td><td>1 Girassol</td><td><span style="font-size:10px;color:var(--text-2);">Grupo 2</span></td></tr>
+              <tr class="roda-past roda-iara"><td><strong>25/05</strong> ✅</td><td>1 Rosa Branca</td><td><span class="iara-badge-sm">Grupo 1</span></td></tr>
+              <!-- JUNHO — futuro -->
+              <tr class="roda-next"><td><strong>01/06</strong> <span class="next-badge">PRÓXIMA</span></td><td>🍌 1 fruta na cor <strong>AMARELA</strong></td><td><span class="todos-badge">Todos</span></td></tr>
+              <tr class="roda-todos"><td><strong>08/06</strong></td><td>🥦 1 fruta na cor <strong>VERDE</strong></td><td><span class="todos-badge">Todos</span></td></tr>
+              <tr class="roda-todos"><td><strong>15/06</strong></td><td>🍎 1 fruta na cor <strong>VERMELHA</strong></td><td><span class="todos-badge">Todos</span></td></tr>
+              <tr class="roda-todos"><td><strong>22/06</strong></td><td>🍇 1 fruta na cor <strong>ROXA</strong></td><td><span class="todos-badge">Todos</span></td></tr>
+              <tr class="roda-todos"><td><strong>29/06</strong></td><td>🍓 Fruta <strong>favorita da criança</strong></td><td><span class="todos-badge">Todos</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-2);background:var(--escola-light);border:1px solid var(--escola-border);border-radius:7px;padding:8px 12px;">
+            🏫 <strong>Grupos:</strong> G1: Antonio, Caetano C., Flora C., Daniel, <strong>Iara</strong>, Lucas, Matheus, Pedro C., Sofia &nbsp;|&nbsp; G2: Arthur, Caetano L., Caique, Cecília, Enrico, Flora P., Miguel, Marina, Pedro F
+          </div>
         </div>
-        <div class="status" id="connectionStatus">Pronto</div>
-      </section>
 
-      <section class="command-panel" aria-label="Comando por voz">
-        <button class="mic-button" id="recordButton" type="button" aria-label="Gravar audio">
-          <span class="mic-icon" aria-hidden="true"></span>
-        </button>
-        <p id="recordingLabel">Toque para gravar</p>
-        <output id="transcriptOutput" class="transcript" aria-live="polite">
-          Exemplos: agendar medico, anotar algo, criar conteudo ou buscar arquivo.
-        </output>
-      </section>
-
-      <section class="quick-actions" aria-label="Acoes rapidas">
-        <button type="button" data-example="Agendar cardiologista para terça de manhã">Agendar medico</button>
-        <button type="button" data-example="Anotar que o exame de sangue ficou pronto">Anotar</button>
-        <button type="button" data-example="Criar conteudo sobre rotina de cuidados da familia">Criar conteudo</button>
-        <button type="button" data-example="Buscar arquivo do plano de saude no Drive">Buscar arquivo</button>
-      </section>
-
-      <section class="results" aria-label="Ultimas solicitacoes">
-        <div class="section-heading">
-          <h2>Ultimas solicitacoes</h2>
-          <button id="clearHistory" type="button">Limpar</button>
+        <!-- Recados & Atividades -->
+        <div>
+          <div class="escola-block-title">📨 Recados & Atividades ClassApp</div>
+          <div style="font-size:11.5px;color:var(--text-2);margin-bottom:12px;">Tarefas e pedidos recebidos pela escola</div>
+          <div class="recados-empty">
+            <div style="font-size:36px;">📭</div>
+            <p>Nenhum recado pendente</p>
+            <p style="font-size:11.5px;margin-top:4px;">O app de voz vai adicionar recados aqui automaticamente quando ficar pronto</p>
+          </div>
         </div>
-        <div id="historyList" class="history-list"></div>
-      </section>
-    </main>
 
-    <script src="/app.js" type="module"></script>
-  </body>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SAÚDE ── -->
+<div class="collapsible-section">
+  <button class="collapsible-header" onclick="toggleSection('saude')">
+    <div class="c-title">
+      <h3>🏥 Saúde</h3>
+      <p>Especialistas, medicamentos e consultas</p>
+    </div>
+    <div class="c-chips">
+      <span class="c-chip cc-purple">Iara: 3 especialistas ativos</span>
+      <span class="c-chip cc-blue">Caique: 3 a agendar</span>
+      <span class="c-chip cc-gray">Ambos: ferro suplemento</span>
+    </div>
+    <span class="c-arrow" id="arrow-saude">▾</span>
+  </button>
+  <div class="collapsible-body" id="content-saude">
+
+    <!-- Child cards -->
+    <div class="main-grid">
+
+      <!-- IARA -->
+      <div class="child-card iara">
+        <div class="child-header">
+          <div class="avatar">🌸</div>
+          <div class="child-meta">
+            <h2>Iara</h2>
+            <p>Iara Correa Curado · 23/08/2020 · 5 anos</p>
+          </div>
+        </div>
+        <div class="child-body">
+          <div>
+            <div class="section-label">Medicamentos</div>
+            <div class="med-item">
+              <div class="med-icon">💊</div>
+              <div><div class="med-name">Ferro (suplemento)</div><div class="med-detail">Indicação pendente de exame para definir continuidade</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">Especialistas</div>
+            <div class="followup-item active">
+              <div class="followup-icon">🧩</div>
+              <div class="followup-content">
+                <div class="followup-title iara-color">Terapia Ocupacional</div>
+                <div class="followup-sub">Sessões semanais toda terça às 9h · R. Turiassu 519, cj 94, Perdizes · até ago/2026</div>
+              </div>
+              <div class="status-badge badge-active">ATIVO</div>
+            </div>
+            <div class="followup-item active">
+              <div class="followup-icon">🧠</div>
+              <div class="followup-content">
+                <div class="followup-title iara-color">Neurologista</div>
+                <div class="followup-sub">Dra. Juliana Gaigher · Instituto Neuro Saúde · (11) 2367-8850 · teleconsulta 09/06 às 13h</div>
+              </div>
+              <div class="status-badge badge-active">ATIVO</div>
+            </div>
+            <div class="followup-item active">
+              <div class="followup-icon">📋</div>
+              <div class="followup-content">
+                <div class="followup-title iara-color">Avaliação Neuropsicológica</div>
+                <div class="followup-sub">Em andamento — aguardar laudo</div>
+              </div>
+              <div class="status-badge badge-pending">AGUARD.</div>
+            </div>
+            <div class="followup-item urgent">
+              <div class="followup-icon">🦷</div>
+              <div class="followup-content">
+                <div class="followup-title urgent-color">Dentista — aparelho noturno</div>
+                <div class="followup-sub">Ana Riso Odontologia · consultas mensais · <strong>remarcar urgente</strong></div>
+              </div>
+              <div class="status-badge badge-urgent">REMARCAR</div>
+            </div>
+            <div class="followup-item urgent">
+              <div class="followup-icon">🔬</div>
+              <div class="followup-content">
+                <div class="followup-title urgent-color">Dermatologista</div>
+                <div class="followup-sub">Investigar alergia de pele · ainda não agendado</div>
+              </div>
+              <div class="status-badge badge-urgent">AGENDAR</div>
+            </div>
+            <div class="followup-item routine">
+              <div class="followup-icon">🤸</div>
+              <div class="followup-content">
+                <div class="followup-title routine-color">Osteopata</div>
+                <div class="followup-sub">Recomendado a cada 6 meses — preventivo (ambos)</div>
+              </div>
+              <div class="status-badge badge-routine">PREVENTIVO</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAIQUE -->
+      <div class="child-card caique">
+        <div class="child-header">
+          <div class="avatar">🦁</div>
+          <div class="child-meta">
+            <h2>Caique</h2>
+            <p>Caique Correa Curado · 21/06/2024 · 23 meses</p>
+          </div>
+        </div>
+        <div class="child-body">
+          <div>
+            <div class="section-label">Medicamentos</div>
+            <div class="med-item">
+              <div class="med-icon">💊</div>
+              <div><div class="med-name">Ferro (suplemento)</div><div class="med-detail">Suplementação de rotina</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">A agendar</div>
+            <div class="followup-item urgent">
+              <div class="followup-icon">🦶</div>
+              <div class="followup-content">
+                <div class="followup-title urgent-color">Ortopedista</div>
+                <div class="followup-sub">Pisada torta — ainda não agendado</div>
+              </div>
+              <div class="status-badge badge-urgent">AGENDAR</div>
+            </div>
+            <div class="followup-item urgent">
+              <div class="followup-icon">👶</div>
+              <div class="followup-content">
+                <div class="followup-title urgent-color">Pediatra — checkup geral</div>
+                <div class="followup-sub">Nunca fez checkup com exames de rotina</div>
+              </div>
+              <div class="status-badge badge-urgent">AGENDAR</div>
+            </div>
+            <div class="followup-item routine">
+              <div class="followup-icon">🤸</div>
+              <div class="followup-content">
+                <div class="followup-title routine-color">Osteopata</div>
+                <div class="followup-sub">Recomendado a cada 6 meses — preventivo (ambos)</div>
+              </div>
+              <div class="status-badge badge-routine">PREVENTIVO</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Consultas -->
+    <div class="appt-header">
+      <h4>📅 Consultas</h4>
+      <p>Próximas agendadas e a agendar · Google Calendar</p>
+    </div>
+    <div style="margin:0 20px 12px;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:10px 14px;font-size:12px;color:#065f46;">
+      ✅ <strong>Iara:</strong> TO toda terça às 9h · Neurologista 09/06 às 13h &nbsp;·&nbsp; <strong>Caique:</strong> sem consultas agendadas
+    </div>
+    <div style="padding:0 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);">Próximas confirmadas</div>
+    <div class="appt-list">
+      <div class="appt-item" style="border-color:#6ee7b7;background:#ecfdf5;">
+        <div class="appt-date iara-date"><span>JUN</span><span class="day">02</span><span>2026</span></div>
+        <div class="appt-details"><div class="appt-title">Terapia Ocupacional</div><div class="appt-sub">09h · R. Turiassu 519, cj 94 — Perdizes · semanais até ago/2026</div></div>
+        <span class="who-badge iara-badge">Iara</span>
+      </div>
+      <div class="appt-item" style="border-color:#6ee7b7;background:#ecfdf5;">
+        <div class="appt-date iara-date"><span>JUN</span><span class="day">09</span><span>2026</span></div>
+        <div class="appt-details"><div class="appt-title">Neurologista — teleconsulta 🖥️</div><div class="appt-sub">13h · Dra. Juliana Gaigher Gonçalves · (11) 2367-8850</div></div>
+        <span class="who-badge iara-badge">Iara</span>
+      </div>
+    </div>
+    <div style="padding:10px 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);">A agendar</div>
+    <div class="appt-list" style="padding-bottom:16px;">
+      <div class="appt-item" style="border-color:#fca5a5;background:#fef2f2;">
+        <div class="appt-date" style="background:#fef2f2;color:#dc2626;border:1px dashed #fca5a5;width:44px;height:44px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;">?</div>
+        <div class="appt-details"><div class="appt-title">Dermatologista — alergia de pele</div><div class="appt-sub">Ainda não agendado</div></div>
+        <span class="who-badge iara-badge">Iara</span>
+      </div>
+      <div class="appt-item" style="border-color:#fca5a5;background:#fef2f2;">
+        <div class="appt-date" style="background:#fef2f2;color:#dc2626;border:1px dashed #fca5a5;width:44px;height:44px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;">?</div>
+        <div class="appt-details"><div class="appt-title">Dentista — aparelho noturno (retorno mensal)</div><div class="appt-sub">Ana Riso Odontologia · remarcar urgente</div></div>
+        <span class="who-badge iara-badge">Iara</span>
+      </div>
+      <div class="appt-item" style="border-color:#fca5a5;background:#fef2f2;">
+        <div class="appt-date" style="background:#fef2f2;color:#dc2626;border:1px dashed #fca5a5;width:44px;height:44px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;">?</div>
+        <div class="appt-details"><div class="appt-title">Ortopedista — pisada torta</div><div class="appt-sub">Ainda não agendado</div></div>
+        <span class="who-badge caique-badge">Caique</span>
+      </div>
+      <div class="appt-item" style="border-color:#fca5a5;background:#fef2f2;">
+        <div class="appt-date" style="background:#fef2f2;color:#dc2626;border:1px dashed #fca5a5;width:44px;height:44px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;">?</div>
+        <div class="appt-details"><div class="appt-title">Pediatra — checkup geral + exames</div><div class="appt-sub">Nunca fez exames de rotina</div></div>
+        <span class="who-badge caique-badge">Caique</span>
+      </div>
+    </div>
+
+    <!-- Histórico -->
+    <div style="padding:0 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);">Histórico recente</div>
+    <div class="appt-list" style="padding-bottom:16px;">
+      <div class="appt-item" style="opacity:0.6;">
+        <div class="appt-date iara-date"><span>MAR</span><span class="day">10</span><span>2026</span></div>
+        <div class="appt-details"><div class="appt-title">Endocrinologista · Endoclinica Lapa</div><div class="appt-sub">Alta — sem achados relevantes</div></div>
+        <span class="who-badge iara-badge">Iara</span>
+      </div>
+      <div class="appt-item" style="opacity:0.6;">
+        <div class="appt-date iara-date"><span>FEV</span><span class="day">26</span><span>2026</span></div>
+        <div class="appt-details"><div class="appt-title">Dentista · Ana Riso Odontologia</div><div class="appt-sub">Último retorno — precisa remarcar</div></div>
+        <span class="who-badge iara-badge">Iara</span>
+      </div>
+      <div class="appt-item" style="opacity:0.6;">
+        <div class="appt-date iara-date"><span>FEV</span><span class="day">12</span><span>2026</span></div>
+        <div class="appt-details"><div class="appt-title">Otorrino</div><div class="appt-sub">Investigação desvio de septo — Alta, nada encontrado</div></div>
+        <span class="who-badge iara-badge">Iara</span>
+      </div>
+    </div>
+
+    <!-- Drive exames -->
+    <div style="padding:0 20px 4px;border-top:1px solid var(--border);padding-top:14px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);margin-bottom:10px;">📁 Pasta de exames no Drive</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="https://drive.google.com/drive/folders/1vPbKyYFEfuW-suvf7yolDf-z6g2sR9tE" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:7px;background:#f3effe;border:1px solid var(--iara-border);border-radius:8px;padding:8px 14px;text-decoration:none;font-size:12.5px;font-weight:600;color:var(--iara);">📁 Exames da Iara</a>
+        <a href="https://drive.google.com/drive/folders/1DTB48Fw6sNEROYHyWeO8_A8X5lQeB63e" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:7px;background:var(--caique-light);border:1px solid var(--caique-border);border-radius:8px;padding:8px 14px;text-decoration:none;font-size:12.5px;font-weight:600;color:var(--caique);">📁 Exames do Caique</a>
+        <a href="https://drive.google.com/drive/folders/1pIKrEeYp5Xo-7YAldvQ902wimpQ9BeiH" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-decoration:none;font-size:12px;color:var(--text-2);">📂 Pasta raiz Saúde Filhos</a>
+      </div>
+    </div>
+
+    <!-- Notas -->
+    <div class="notes-wrap" style="border-top:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;margin-bottom:14px;">📝 Notas & Observações</div>
+      <div class="notes-grid">
+        <div class="notes-child iara-notes"><h4>🌸 Iara</h4><textarea class="note-textarea" placeholder="Ex: resultado da TO chegou em jun/25…"></textarea></div>
+        <div class="notes-child caique-notes"><h4>🦁 Caique</h4><textarea class="note-textarea" placeholder="Ex: ortopedista indicou palmilha em jul/25…"></textarea></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── RELATÓRIOS & EXAMES ── -->
+<div class="collapsible-section">
+  <button class="collapsible-header" onclick="toggleSection('docs')">
+    <div class="c-title">
+      <h3>📋 Relatórios & Exames</h3>
+      <p>Iara · documentos para compartilhar com médicos</p>
+    </div>
+    <div class="c-chips">
+      <span class="c-chip cc-purple">2 relatórios · mai/2026</span>
+      <span class="c-chip cc-gray">Drive: pasta exames vinculada</span>
+    </div>
+    <span class="c-arrow" id="arrow-docs">▾</span>
+  </button>
+  <div class="collapsible-body open" id="content-docs">
+
+    <!-- Links rápidos para o Drive -->
+    <div style="padding:14px 20px 0;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--border);">
+      <a href="https://drive.google.com/drive/folders/1vPbKyYFEfuW-suvf7yolDf-z6g2sR9tE" target="_blank" rel="noopener"
+         class="doc-drive-link" style="background:var(--iara-light);border-color:var(--iara-border);color:var(--iara);">
+        📁 Pasta Exames Iara — Drive
+      </a>
+      <a href="https://drive.google.com/drive/folders/1DTB48Fw6sNEROYHyWeO8_A8X5lQeB63e" target="_blank" rel="noopener"
+         class="doc-drive-link" style="background:var(--caique-light);border-color:var(--caique-border);color:var(--caique);">
+        📁 Pasta Exames Caique — Drive
+      </a>
+    </div>
+
+    <div style="padding:12px 20px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);">
+      Relatórios clínicos — Iara
+    </div>
+    <div class="docs-list">
+
+      <!-- Relatório da família para a TO -->
+      <a href="iara_relatorio_TO_mai2026.pdf" target="_blank" class="doc-row">
+        <span class="doc-icon">📝</span>
+        <div class="doc-info">
+          <div class="doc-title">Observações Familiares — para a Terapeuta Ocupacional</div>
+          <div class="doc-meta">mai/2026 · Elaborado pela família · 7 páginas</div>
+          <div class="doc-meta" style="margin-top:3px;color:#888;">Perfil, histórico de desenvolvimento, sensorialidade, sono, transições, episódios semanais, perguntas para a TO</div>
+        </div>
+        <span class="doc-badge" style="background:var(--iara-light);color:var(--iara);border:1px solid var(--iara-border);">Relatório</span>
+        <span class="doc-btn">Abrir ↗</span>
+      </a>
+
+      <!-- Perfil Sensorial 2 -->
+      <a href="iara_perfil_sensorial_mai2026.pdf" target="_blank" class="doc-row">
+        <span class="doc-icon">📊</span>
+        <div class="doc-info">
+          <div class="doc-title">Perfil Sensorial 2 — Questionário do cuidador (respondido)</div>
+          <div class="doc-meta">mai/2026 · Respondido por Tyfane · Instrumento Winnie Dunn / Pearson</div>
+          <div class="doc-meta" style="margin-top:3px;color:#888;">Auditivo, visual, tato, movimentos, posição do corpo, oral, conduta, socioemocional, atenção</div>
+        </div>
+        <span class="doc-badge" style="background:#fffbeb;color:#92400e;border:1px solid #fcd34d;">Avaliação</span>
+        <span class="doc-btn">Abrir ↗</span>
+      </a>
+
+    </div>
+
+    <div style="padding:4px 20px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);">
+      Exames laboratoriais
+    </div>
+    <div class="docs-list" style="padding-top:4px;">
+      <a href="https://drive.google.com/drive/folders/1vPbKyYFEfuW-suvf7yolDf-z6g2sR9tE" target="_blank" class="doc-row" style="border-style:dashed;opacity:0.75;">
+        <span class="doc-icon">🩸</span>
+        <div class="doc-info">
+          <div class="doc-title">Exames laboratoriais — Iara</div>
+          <div class="doc-meta">Salvar resultados na pasta do Drive conforme chegarem</div>
+        </div>
+        <span class="doc-badge" style="background:var(--bg);color:var(--text-2);border:1px solid var(--border);">Drive</span>
+        <span class="doc-btn">Ver pasta</span>
+      </a>
+      <a href="https://drive.google.com/drive/folders/1DTB48Fw6sNEROYHyWeO8_A8X5lQeB63e" target="_blank" class="doc-row" style="border-style:dashed;opacity:0.75;">
+        <span class="doc-icon">🩸</span>
+        <div class="doc-info">
+          <div class="doc-title">Exames laboratoriais — Caique</div>
+          <div class="doc-meta">Salvar resultados na pasta do Drive conforme chegarem</div>
+        </div>
+        <span class="doc-badge" style="background:var(--bg);color:var(--text-2);border:1px solid var(--border);">Drive</span>
+        <span class="doc-btn blue">Ver pasta</span>
+      </a>
+    </div>
+
+    <div style="padding:10px 20px 14px;font-size:11px;color:var(--text-2);border-top:1px solid var(--border);margin-top:6px;">
+      💡 Os relatórios abrem localmente. Para compartilhar com médicos, envie o PDF por e-mail ou suba na <a href="https://drive.google.com/drive/folders/1vPbKyYFEfuW-suvf7yolDf-z6g2sR9tE" target="_blank" style="color:var(--iara);">pasta Iara no Drive</a>.
+    </div>
+  </div>
+</div>
+
+<!-- ── VACINAS ── -->
+<div class="collapsible-section">
+  <button class="collapsible-header" onclick="toggleSection('vacinas')">
+    <div class="c-title">
+      <h3>💉 Vacinas</h3>
+      <p>Calendário vacinal completo</p>
+    </div>
+    <div class="c-chips">
+      <span class="c-chip cc-red">Iara: Gripe 2026 pendente</span>
+      <span class="c-chip cc-green">Caique: em dia ✅</span>
+      <span class="c-chip cc-orange">Caique: Tríplice Viral 2ª dose — verificar</span>
+    </div>
+    <span class="c-arrow" id="arrow-vacinas">▾</span>
+  </button>
+  <div class="collapsible-body" id="content-vacinas">
+    <div class="vaccine-wrap">
+      <div style="margin-bottom:16px;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:9px 14px;font-size:12px;color:#065f46;">
+        ✅ Carteiras atualizadas em mai/2026 · UBS Vila Ipojuca · CNES 2788985
+      </div>
+      <div class="vaccine-grid">
+        <div class="vaccine-child iara-vc">
+          <h4>🌸 Iara — nascida 23/08/2020</h4>
+          <div style="background:#fef9c3;border:1px solid #fde047;border-radius:7px;padding:7px 10px;font-size:11px;color:#713f12;margin-bottom:10px;">
+            📋 Próxima vacina calendário público: <strong>HPV aos 9 anos — 23/08/2029</strong>
+          </div>
+          <table class="vaccine-table">
+            <thead><tr><th>Vacina</th><th>Doses</th><th>Última data</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>BCG</td><td>1/1</td><td>Nascimento 2020</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Hepatite B</td><td>4/4</td><td>Jun/2022</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Rotavírus Pentavalente</td><td>3/3</td><td>Mar/2021</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Hexavalente (DTP+Pólio+Hib)</td><td>3/3</td><td>Mar/2021</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>DTP Reforço</td><td>2/2</td><td>Jun/2022</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Poliomielite Reforço</td><td>2/2</td><td>Jun/2022</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Pneumococo 13v</td><td>4/4</td><td>Jun/2022</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Meningococo ACWY</td><td>3/3</td><td>Nov/2021</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Meningococo B</td><td>3/3</td><td>Nov/2021</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Tríplice Viral (SCR)</td><td>2/2</td><td>Carteira ✓</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Varicela</td><td>2/2</td><td>Carteira ✓</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Hepatite A</td><td>2/2</td><td>Carteira ✓</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Febre Amarela</td><td>1/1</td><td>~Jun/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Dengue Qdenga</td><td>2/2</td><td>1ª: 27/01/2025 · 2ª: ✓</td><td class="v-done">✅ Completa</td></tr>
+              <tr style="background:#fef2f2;"><td><strong>Gripe (anual — maio)</strong></td><td>2025 ✓ · 2026 ✗</td><td>Mai/2025</td><td class="v-missing">🔴 2026 PENDENTE</td></tr>
+              <tr style="background:#eff6ff;"><td>HPV</td><td>0/2</td><td>—</td><td style="color:#2563eb;font-weight:600;">📅 Ago/2029 (9 anos)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="vaccine-child caique-vc">
+          <h4>🦁 Caique — nascido 21/06/2024</h4>
+          <div style="background:#eff8ff;border:1px solid #7dd3fc;border-radius:7px;padding:7px 10px;font-size:11px;color:#0369a1;margin-bottom:10px;">
+            📋 Declaração atualizada 05/12/2025 · UBS CNES 2788985
+          </div>
+          <table class="vaccine-table">
+            <thead><tr><th>Vacina</th><th>Doses</th><th>Última data</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>BCG</td><td>1/1</td><td>22/06/2024</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Hepatite B</td><td>4/4</td><td>14/10/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Rotavírus Pentavalente</td><td>2/2</td><td>28/10/2024</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Hexavalente (DTP+Pólio+Hib)</td><td>3/3</td><td>07/01/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>DTPa + Polio Reforço</td><td>1/1</td><td>14/10/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Pneumococo 13v</td><td>3/3</td><td>28/10/2024</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Pneumococo 20 Reforço</td><td>1/1</td><td>02/09/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Meningococo ACWY</td><td>2/2</td><td>07/03/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Meningococo B</td><td>3/3</td><td>02/09/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr style="background:#fffbeb;"><td>Tríplice Viral (SCR)</td><td>1/2</td><td>07/07/2025</td><td class="v-pending">⚠️ 2ª dose — verificar</td></tr>
+              <tr><td>Varicela</td><td>1/1</td><td>03/12/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Hepatite A</td><td>1/1</td><td>~Jan/2025</td><td class="v-done">✅ Completa</td></tr>
+              <tr><td>Covid-19</td><td>✓</td><td>Carteira ✓</td><td class="v-done">✅ Feita</td></tr>
+              <tr><td>Dengue Qdenga</td><td>—</td><td>—</td><td style="color:#6b6b6b;font-weight:600;">🚫 Só a partir de 4 anos (jun/2028)</td></tr>
+              <tr><td><strong>Gripe (anual — maio)</strong></td><td>2025: 2 doses ✓</td><td>09/05/2026 ✅</td><td class="v-done">✅ 2026 em dia</td></tr>
+              <tr style="background:#eff6ff;"><td>Febre Amarela</td><td>0/1</td><td>—</td><td style="color:#2563eb;font-weight:600;">📅 Verificar com pediatra</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:7px;padding:7px 10px;font-size:11px;color:#92400e;">
+            ⚠️ <strong>Tríplice Viral 2ª dose:</strong> 1ª foi em jul/2025 — 2ª deveria ser ~set/2025. Confirmar com pediatra se foi tomada.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DOCUMENTOS ── -->
+<div class="collapsible-section">
+  <button class="collapsible-header" onclick="toggleSection('documentos')">
+    <div class="c-title">
+      <h3>📄 Documentos</h3>
+      <p>Passaportes e identidade</p>
+    </div>
+    <div class="c-chips">
+      <span class="c-chip cc-orange">Passaportes BR: agendado 21/jul ✅</span>
+      <span class="c-chip cc-orange">Caique PT: pedido pendente</span>
+      <span class="c-chip cc-orange">Ambos: RG não emitido</span>
+    </div>
+    <span class="c-arrow" id="arrow-documentos">▾</span>
+  </button>
+  <div class="collapsible-body" id="content-documentos">
+    <div class="docs-wrap">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <span style="font-size:11px;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:20px;padding:3px 12px;color:#065f46;">🟢 Válido</span>
+        <span style="font-size:11px;background:#fffbeb;border:1px solid #fcd34d;border-radius:20px;padding:3px 12px;color:#92400e;">🟡 Atenção — menos de 1 ano</span>
+        <span style="font-size:11px;background:#fef2f2;border:1px solid #fca5a5;border-radius:20px;padding:3px 12px;color:#991b1b;">🔴 Vencido / menos de 6 meses</span>
+      </div>
+      <div class="docs-grid">
+
+        <!-- IARA -->
+        <div style="background:var(--surface);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+          <div style="padding:14px 18px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:var(--iara-light);display:flex;align-items:center;justify-content:center;font-size:16px;">🌸</div>
+            <div><div style="font-size:15px;font-weight:700;color:var(--iara);">Iara</div><div style="font-size:11px;color:var(--text-2);">Iara Correa Curado · 23/08/2020</div></div>
+          </div>
+          <div style="padding:14px 18px;display:flex;flex-direction:column;gap:12px;">
+            <!-- BR -->
+            <div style="border-radius:9px;border:2px solid #fca5a5;overflow:hidden;">
+              <div style="background:#1d4ed8;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🇧🇷</span><span style="font-size:11.5px;font-weight:700;color:white;">PASSAPORTE BRASILEIRO</span></div>
+                <span style="font-size:10px;font-weight:700;background:#d97706;color:white;border-radius:20px;padding:2px 9px;">📅 AGENDADO 21/JUL</span>
+              </div>
+              <div style="background:#fffbeb;padding:6px 12px;font-size:11px;color:#92400e;font-weight:600;">✅ Agendamento feito · PEP West Plaza · 21/07/2026 às 10h55 · Protocolo: 1.2026.0001888677</div>
+              <div style="padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--bg);">
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Número</div><div style="font-size:13px;font-weight:600;">GH208870</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Validade</div><div style="font-size:13px;font-weight:700;color:#dc2626;">27/06/2026</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Emissão</div><div style="font-size:12px;">28/06/2023</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Autoridade</div><div style="font-size:12px;">SR/DPF/SP</div></div>
+              </div>
+            </div>
+            <!-- PT -->
+            <div style="border-radius:9px;border:2px solid #6ee7b7;overflow:hidden;">
+              <div style="background:#006600;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🇵🇹</span><span style="font-size:11.5px;font-weight:700;color:white;">PASSAPORTE PORTUGUÊS</span></div>
+                <span style="font-size:10px;font-weight:700;background:#059669;color:white;border-radius:20px;padding:2px 9px;">🟢 VÁLIDO</span>
+              </div>
+              <div style="padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--bg);">
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Número</div><div style="font-size:13px;font-weight:600;">CE295689</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Validade</div><div style="font-size:13px;font-weight:700;color:#059669;">01/02/2029</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Emissão</div><div style="font-size:12px;">01/02/2024</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Nº Identificação PT</div><div style="font-size:12px;">33341455</div></div>
+              </div>
+            </div>
+            <!-- RG -->
+            <div style="border-radius:9px;border:1px solid #fcd34d;overflow:hidden;">
+              <div style="background:#374151;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:15px;">🪪</span><span style="font-size:11.5px;font-weight:700;color:white;">RG / IDENTIDADE BR</span></div>
+                <span style="font-size:10px;font-weight:700;background:#d97706;color:white;border-radius:20px;padding:2px 9px;">🟡 NÃO EMITIDO</span>
+              </div>
+              <div style="padding:9px 12px;background:var(--bg);font-size:11.5px;color:#d97706;font-weight:600;">📍 Agendar no Poupatempo SP — pode ser feito a qualquer idade</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAIQUE -->
+        <div style="background:var(--surface);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+          <div style="padding:14px 18px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:var(--caique-light);display:flex;align-items:center;justify-content:center;font-size:16px;">🦁</div>
+            <div><div style="font-size:15px;font-weight:700;color:var(--caique);">Caique</div><div style="font-size:11px;color:var(--text-2);">Caique Correa Curado · 21/06/2024</div></div>
+          </div>
+          <div style="padding:14px 18px;display:flex;flex-direction:column;gap:12px;">
+            <!-- BR -->
+            <div style="border-radius:9px;border:2px solid #fca5a5;overflow:hidden;">
+              <div style="background:#1d4ed8;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🇧🇷</span><span style="font-size:11.5px;font-weight:700;color:white;">PASSAPORTE BRASILEIRO</span></div>
+                <span style="font-size:10px;font-weight:700;background:#d97706;color:white;border-radius:20px;padding:2px 9px;">📅 AGENDADO 21/JUL</span>
+              </div>
+              <div style="background:#fffbeb;padding:6px 12px;font-size:11px;color:#92400e;font-weight:600;">✅ Agendamento feito · PEP West Plaza · 21/07/2026 às 10h55 · Protocolo: 1.2026.0001888774</div>
+              <div style="padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--bg);">
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Número</div><div style="font-size:13px;font-weight:600;">GK903339</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Validade</div><div style="font-size:13px;font-weight:700;color:#dc2626;">11/02/2026 ❌</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Emissão</div><div style="font-size:12px;">12/02/2025</div></div>
+                <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-2);margin-bottom:2px;">Autoridade</div><div style="font-size:12px;">SR/PF/SP</div></div>
+              </div>
+            </div>
+            <!-- PT pendente -->
+            <div style="border-radius:9px;border:2px solid #fcd34d;overflow:hidden;">
+              <div style="background:#006600;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🇵🇹</span><span style="font-size:11.5px;font-weight:700;color:white;">NACIONALIDADE PORTUGUESA</span></div>
+                <span style="font-size:10px;font-weight:700;background:#d97706;color:white;border-radius:20px;padding:2px 9px;">🟡 PEDIDO PENDENTE</span>
+              </div>
+              <div style="background:#fffbeb;padding:6px 12px;font-size:11px;color:#92400e;font-weight:600;">Iniciar processo no Consulado Geral de Portugal em SP</div>
+              <div style="padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:4px;">
+                <div style="font-size:11.5px;">📍 <strong>Consulado Geral de Portugal</strong> — Av. Paulista, 726 · (11) 3371-7200</div>
+                <div style="font-size:11px;color:var(--text-2);">Docs necessários: certidão nascimento BR + docs dos pais (passaporte PT + certidão nascimento PT)</div>
+              </div>
+            </div>
+            <!-- RG -->
+            <div style="border-radius:9px;border:1px solid #fcd34d;overflow:hidden;">
+              <div style="background:#374151;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:15px;">🪪</span><span style="font-size:11.5px;font-weight:700;color:white;">RG / IDENTIDADE BR</span></div>
+                <span style="font-size:10px;font-weight:700;background:#d97706;color:white;border-radius:20px;padding:2px 9px;">🟡 NÃO EMITIDO</span>
+              </div>
+              <div style="padding:9px 12px;background:var(--bg);font-size:11.5px;color:#d97706;font-weight:600;">📍 Agendar no Poupatempo SP</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- Pasta passaportes -->
+      <div style="margin-top:16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;overflow:hidden;">
+        <div style="padding:10px 16px;border-bottom:1px solid #fde68a;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:18px;">📁</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#92400e;">Documentos Passaporte BR — Jul/2026</div>
+              <div style="font-size:11px;color:#78350f;margin-top:1px;">21/07/2026 às 10h55 · PEP West Plaza · Água Branca</div>
+            </div>
+          </div>
+          <span style="font-size:10px;font-weight:700;background:#d97706;color:white;border-radius:20px;padding:2px 10px;">📅 AGENDADO</span>
+        </div>
+        <div style="padding:10px 16px;display:flex;flex-direction:column;gap:6px;">
+          <a href="passaportes_jul2026/agendamento_iara_caique_21jul2026.pdf" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">📄 Comprovante de agendamento — Iara & Caique</a>
+          <a href="passaportes_jul2026/autorizacao_menor_iara.pdf" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">📄 Autorização de menor — Iara</a>
+          <a href="passaportes_jul2026/autorizacao_menor_caique.pdf" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">📄 Autorização de menor — Caique</a>
+          <a href="passaportes_jul2026/comprovante_pagamento_iara.pdf" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">📄 Comprovante de pagamento — Iara</a>
+          <a href="passaportes_jul2026/instrucoes_iara.pdf" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">📄 Instruções — Iara (protocolo 1.2026.0001888677)</a>
+          <a href="passaportes_jul2026/instrucoes_caique.pdf" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">📄 Instruções — Caique (protocolo 1.2026.0001888774)</a>
+          <div style="border-top:1px solid #fde68a;margin:6px 0;"></div>
+          <a href="passaportes_jul2026/passaporte_PT_iara_CE295689.jpg" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">🪪 Passaporte PT — Iara (CE295689 · válido até 01/02/2029)</a>
+          <a href="passaportes_jul2026/passaporte_BR_iara_GH208870.jpg" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">🪪 Passaporte BR — Iara (GH208870 · vence 27/06/2026)</a>
+          <a href="passaportes_jul2026/passaporte_BR_caique_GK903339.jpg" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#92400e;text-decoration:none;">🪪 Passaporte BR — Caique (GK903339 · VENCIDO — renovar 21/jul)</a>
+        </div>
+        <div style="padding:8px 16px 10px;background:#fef9c3;border-top:1px solid #fde68a;font-size:11px;color:#78350f;">
+          📸 <strong>Caique tem menos de 5 anos</strong> — levar foto 5x7 colorida, fundo branco, recente, sem data &nbsp;·&nbsp; Chegar às <strong>10h40</strong> (15 min antes)
+        </div>
+      </div>
+
+      <div style="margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px 16px;font-size:12px;color:var(--text-2);">
+        💡 <strong>Após o atendimento:</strong> retirar passaporte no posto · prazo máximo 90 dias (não retirado = cancelado sem reembolso).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DIÁRIO DE DOENÇAS ── -->
+<div class="collapsible-section">
+  <button class="collapsible-header" onclick="toggleSection('diario')">
+    <div class="c-title">
+      <h3>🤒 Diário de Doenças</h3>
+      <p>Episódios, sintomas e medicamentos</p>
+    </div>
+    <div class="c-chips">
+      <span class="c-chip cc-red">Caique: episódio em curso</span>
+    </div>
+    <span class="c-arrow" id="arrow-diario">▾</span>
+  </button>
+  <div class="collapsible-body" id="content-diario">
+    <div class="diary-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:13px;font-weight:700;">Episódios registrados</div>
+        <button onclick="toggleDiaryForm()" id="diary-add-btn" style="background:var(--red);color:white;border:none;border-radius:7px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;">＋ Novo episódio</button>
+      </div>
+      <div id="diary-form" style="display:none;background:white;border:2px solid var(--red-border);border-radius:12px;padding:18px;margin-bottom:16px;">
+        <h4 style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px;">Registrar episódio</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="fam-form-field"><label>Filho</label><select id="d-filho"><option value="Caique">🦁 Caique</option><option value="Iara">🌸 Iara</option></select></div>
+          <div class="fam-form-field"><label>Data início</label><input id="d-data" type="date"/></div>
+          <div class="fam-form-field" style="grid-column:span 2;"><label>Título / resumo</label><input id="d-titulo" type="text" placeholder="Ex: Febre + coriza"/></div>
+          <div class="fam-form-field" style="grid-column:span 2;"><label>Primeiro evento</label><input id="d-desc" type="text" placeholder="Ex: Febre 38.5°C, pouco apetite"/></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button onclick="addDiaryEpisode()" style="background:var(--red);color:white;border:none;border-radius:7px;padding:7px 16px;font-size:12.5px;font-weight:600;cursor:pointer;">Salvar</button>
+          <button onclick="toggleDiaryForm()" style="background:var(--bg);color:var(--text-2);border:1px solid var(--border);border-radius:7px;padding:7px 16px;font-size:12.5px;cursor:pointer;">Cancelar</button>
+        </div>
+      </div>
+      <div id="diary-list"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── CRESCIMENTO ── -->
+<div class="collapsible-section" style="margin-bottom:24px;">
+  <button class="collapsible-header" onclick="toggleSection('crescimento')">
+    <div class="c-title">
+      <h3>📏 Crescimento</h3>
+      <p>Peso e altura ao longo do tempo</p>
+    </div>
+    <div class="c-chips" id="growth-header-chips">
+      <span class="c-chip cc-gray">Registre peso e altura</span>
+    </div>
+    <span class="c-arrow" id="arrow-crescimento">▾</span>
+  </button>
+  <div class="collapsible-body" id="content-crescimento">
+    <div class="growth-wrap">
+      <div class="growth-grid">
+
+        <!-- Iara -->
+        <div class="growth-child">
+          <div class="growth-child-header">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--iara-light);display:flex;align-items:center;justify-content:center;font-size:15px;">🌸</div>
+            <h4 style="font-size:13.5px;font-weight:700;color:var(--iara);">Iara · 5 anos</h4>
+          </div>
+          <div id="growth-iara-latest" class="growth-latest">
+            <div style="text-align:center;width:100%;padding:14px;color:var(--text-2);font-size:12px;">Sem medidas ainda</div>
+          </div>
+          <div style="padding:10px 14px 0;max-height:180px;overflow-y:auto;">
+            <table class="growth-table"><thead><tr><th>Data</th><th>Peso (kg)</th><th>Altura (cm)</th></tr></thead><tbody id="growth-iara-rows"></tbody></table>
+          </div>
+          <div class="growth-add-form">
+            <div><span class="growth-field-lbl">Data</span><input type="date" id="gi-data" style="width:120px;"/></div>
+            <div><span class="growth-field-lbl">Peso (kg)</span><input type="number" id="gi-peso" step="0.1" placeholder="18.5" style="width:74px;"/></div>
+            <div><span class="growth-field-lbl">Altura (cm)</span><input type="number" id="gi-altura" step="0.5" placeholder="110" style="width:74px;"/></div>
+            <button class="growth-add-btn" style="background:var(--iara);color:white;" onclick="addGrowth('iara')">＋</button>
+          </div>
+        </div>
+
+        <!-- Caique -->
+        <div class="growth-child">
+          <div class="growth-child-header">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--caique-light);display:flex;align-items:center;justify-content:center;font-size:15px;">🦁</div>
+            <h4 style="font-size:13.5px;font-weight:700;color:var(--caique);">Caique · 23 meses</h4>
+          </div>
+          <div id="growth-caique-latest" class="growth-latest">
+            <div style="text-align:center;width:100%;padding:14px;color:var(--text-2);font-size:12px;">Sem medidas ainda</div>
+          </div>
+          <div style="padding:10px 14px 0;max-height:180px;overflow-y:auto;">
+            <table class="growth-table"><thead><tr><th>Data</th><th>Peso (kg)</th><th>Altura (cm)</th></tr></thead><tbody id="growth-caique-rows"></tbody></table>
+          </div>
+          <div class="growth-add-form">
+            <div><span class="growth-field-lbl">Data</span><input type="date" id="gc-data" style="width:120px;"/></div>
+            <div><span class="growth-field-lbl">Peso (kg)</span><input type="number" id="gc-peso" step="0.1" placeholder="12.5" style="width:74px;"/></div>
+            <div><span class="growth-field-lbl">Altura (cm)</span><input type="number" id="gc-altura" step="0.5" placeholder="86" style="width:74px;"/></div>
+            <button class="growth-add-btn" style="background:var(--caique);color:white;" onclick="addGrowth('caique')">＋</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script>
+// ── Collapsible sections ──────────────────────────
+function toggleSection(id) {
+  const body = document.getElementById('content-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+}
+
+// ── Family Activities ─────────────────────────────
+(function() {
+  const STORAGE_KEY = 'fam-activities-sp';
+  const DATA_VERSION = 5;
+
+  const DEFAULT_ACTIVITIES = [
+    { id: 4,  nome: 'SESC Pompeia',             tipo: 'Outro',          env: 'ambos',   dist: '~10 min de carro',                          horas: 'Ter–Sex 9h–21h30 · Sáb–Dom 9h–21h (fecha seg)', link: 'https://www.sescsp.org.br/unidades/pompeia/', kids: 'ambos',  obs: 'Shows infantis, exposições, piscina — checar agenda no site', status: 'quero' },
+    { id: 1,  nome: 'Catavento Cultural',        tipo: 'Museu',          env: 'indoor',  dist: '~20 min de carro (via Marginal Tietê)',      horas: 'Ter–Dom 9h–17h (fecha seg)',                    link: 'https://www.catavento.org.br',               kids: 'ambos',  obs: 'Entrada gratuita aos domingos',                               status: 'quero' },
+    { id: 11, nome: 'Babaachu',                  tipo: 'Loja',           env: 'indoor',  dist: '~10 min de carro (Água Branca)',             horas: 'Confirmar horários',                             link: '',                                           kids: 'ambos',  obs: 'Roupas e brinquedos infantis',                                status: 'quero' },
+    { id: 12, nome: 'Ursaria (Beco do Batman)',  tipo: 'Outro',          env: 'ambos',   dist: '~15 min de carro (Vila Madalena)',           horas: 'Confirmar horários',                             link: '',                                           kids: 'ambos',  obs: 'Loja/café temático de mel e ursos no Beco do Batman',         status: 'quero' },
+    { id: 5,  nome: 'Museu de Zoologia da USP',  tipo: 'Museu',          env: 'indoor',  dist: '~30 min de carro (Ipiranga)',               horas: 'Ter–Dom 9h–17h',                                link: 'https://www.mz.usp.br',                      kids: 'ambos',  obs: 'Grande coleção de animais — muito bom para crianças',         status: 'quero' },
+    { id: 6,  nome: 'Bairro da Liberdade',       tipo: 'Passeio',        env: 'outdoor', dist: '~25 min de carro',                          horas: 'Feira aos domingos na Praça da Liberdade',       link: '',                                           kids: 'ambos',  obs: 'Comida japonesa, artesanato, lojas asiáticas',                status: 'quero' },
+    { id: 9,  nome: 'Fazendinha Cia dos Bichos', tipo: 'Fazenda',        env: 'outdoor', dist: 'Confirmar localização',                      horas: 'Fins de semana — confirmar',                     link: '',                                           kids: 'ambos',  obs: 'Petting farm — contato com animais pequenos',                 status: 'quero' },
+    { id: 7,  nome: 'Sítio Sassafaz',            tipo: 'Fazenda',        env: 'outdoor', dist: '~45 min de carro (Mairiporã)',              horas: 'Fins de semana — confirmar agenda',              link: '',                                           kids: 'ambos',  obs: 'Café da manhã colonial + colheita de frutas e legumes',       status: 'quero' },
+    { id: 2,  nome: 'Parque Ibirapuera',         tipo: 'Parque',         env: 'outdoor', dist: '~30 min de carro (via Faria Lima)',          horas: 'Seg–Dom 5h–24h',                                link: '',                                           kids: 'ambos',  obs: 'Levar bicicleta e lanche',                                    status: 'quero' },
+    { id: 8,  nome: 'Vinícolas de São Roque',    tipo: 'Passeio',        env: 'outdoor', dist: '~1h de carro (SP → São Roque)',             horas: 'Fins de semana — variam por vinícola',           link: '',                                           kids: 'ambos',  obs: '🚗 Passeio de dia — uva, vinhos e paisagem serrana',          status: 'quero' },
+    { id: 13, nome: 'Aquário',                   tipo: 'Museu',          env: 'indoor',  dist: 'Confirmar: Acqua Mundo ~1h30 (Guarujá)',    horas: 'Confirmar no site',                              link: '',                                           kids: 'ambos',  obs: '⚠️ Confirmar qual aquário — Acqua Mundo (Guarujá) ou outro?',  status: 'quero' },
+    { id: 10, nome: 'Zoo Foz',                   tipo: 'Zoo',            env: 'outdoor', dist: '✈️ Viagem — Foz do Iguaçu',                horas: 'Diário 8h30–17h30',                             link: 'https://www.zoofoz.com.br',                  kids: 'ambos',  obs: 'Viagem de fds ou feriado — combinar com Cataratas',           status: 'quero' },
+    { id: 3,  nome: 'KidZania',                  tipo: 'Parque Temático',env: 'indoor',  dist: '~30 min de carro (via Marginal Pinheiros)', horas: 'Diário 9h30–17h / 15h–21h',                    link: 'https://www.kidzania.com.br',                kids: 'iara',   obs: 'Iara tem 5a — idade mínima para maioria das atividades',      status: 'quero' }
+  ];
+
+  let activities = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+  const storedVersion = parseInt(localStorage.getItem(STORAGE_KEY + '-v') || '1');
+  if (!activities || storedVersion < DATA_VERSION) {
+    if (!activities) {
+      activities = DEFAULT_ACTIVITIES;
+    } else {
+      // Migração aditiva: preserva dados do usuário, adiciona novos itens
+      const existingIds = new Set(activities.map(a => a.id));
+      const novos = DEFAULT_ACTIVITIES.filter(d => !existingIds.has(d.id));
+      activities = [...activities, ...novos];
+    }
+    localStorage.setItem(STORAGE_KEY + '-v', DATA_VERSION);
+    save();
+  }
+
+  let currentFilter = 'all';
+
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(activities)); }
+
+  function tipoEmoji(tipo) {
+    return {'Restaurante':'🍽️','Parque':'🌳','Museu':'🏛️','Show/Teatro':'🎭','Oficina':'🎨','Cinema':'🎬','Parque Temático':'🎢','Shopping':'🛍️','Fazenda':'🌾','Passeio':'🗺️','Zoo':'🦁','Loja':'🛒','Outro':'✨'}[tipo] || '✨';
+  }
+
+  function renderFdsDestaque() {
+    const agendados = activities.filter(a => a.status === 'agendado');
+    const destaque = document.getElementById('fds-destaque');
+    const cards = document.getElementById('fds-cards');
+    const chip = document.getElementById('act-count-chip');
+    if (!destaque || !cards) return;
+    if (!agendados.length) {
+      destaque.style.display = 'none';
+      if (chip) {
+        const quero = activities.filter(a => a.status === 'quero').length;
+        chip.textContent = activities.length + ' lugares · ' + quero + ' para conhecer';
+        chip.className = 'c-chip cc-gray';
+      }
+      return;
+    }
+    destaque.style.display = 'block';
+    if (chip) {
+      chip.textContent = '📅 ' + agendados.length + ' agendado' + (agendados.length > 1 ? 's este fds' : ' este fds');
+      chip.className = 'c-chip cc-green';
+    }
+    cards.innerHTML = agendados.map(a =>
+      '<div style="background:white;border:1.5px solid #6ee7b7;border-radius:10px;padding:10px 14px;min-width:160px;max-width:230px;">' +
+        '<div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:2px;">' + tipoEmoji(a.tipo) + ' ' + a.nome + '</div>' +
+        (a.dist ? '<div style="font-size:11px;color:var(--text-2);">📍 ' + a.dist + '</div>' : '') +
+        (a.horas ? '<div style="font-size:11px;color:var(--text-2);">⏰ ' + a.horas + '</div>' : '') +
+        '<button onclick="changeStatus(' + a.id + ',\'quero\')" style="margin-top:8px;font-size:10px;font-weight:700;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;padding:2px 8px;cursor:pointer;">✕ Desmarcar</button>' +
+      '</div>'
+    ).join('');
+  }
+
+  function render() {
+    const grid = document.getElementById('activities-grid');
+    const empty = document.getElementById('empty-state');
+    const countEl = document.getElementById('act-count');
+    let filtered = activities.filter(a => {
+      if (currentFilter === 'all') return true;
+      if (currentFilter === 'indoor') return a.env === 'indoor' || a.env === 'ambos';
+      if (currentFilter === 'outdoor') return a.env === 'outdoor' || a.env === 'ambos';
+      if (['quero','agendado','feito','descartado'].includes(currentFilter)) return a.status === currentFilter;
+      return a.tipo === currentFilter;
+    });
+    const quero = activities.filter(a => a.status === 'quero').length;
+    countEl.textContent = activities.length + ' lugares · ' + quero + ' para conhecer';
+    renderFdsDestaque();
+    if (filtered.length === 0) { grid.style.display = 'none'; empty.style.display = 'block'; return; }
+    grid.style.display = 'grid'; empty.style.display = 'none';
+    const today = new Date();
+    const daysUntilSat = (6 - today.getDay() + 7) % 7 || 7;
+    const sat = new Date(today); sat.setDate(today.getDate() + daysUntilSat);
+    const dateStr = sat.toISOString().replace(/-/g,'').split('T')[0];
+    grid.innerHTML = filtered.map(a => {
+      const envLabel = a.env === 'indoor' ? '🏠 Indoor' : a.env === 'outdoor' ? '☀️ Outdoor' : '🏠☀️ Indoor+Out';
+      const envClass = a.env === 'indoor' ? 'badge-indoor' : a.env === 'outdoor' ? 'badge-outdoor' : 'badge-ambos';
+      const kidsLabel = a.kids === 'ambos' ? '👧🏻👦🏻 Ambos' : a.kids === 'iara' ? '🌸 Iara' : '🦁 Caique';
+      const calUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('🎉 ' + a.nome) + '&dates=' + dateStr + '/' + dateStr + '&details=' + encodeURIComponent((a.obs||'') + (a.horas?'\n⏰ '+a.horas:'') + (a.link?'\n🔗 '+a.link:'')) + '&location=' + encodeURIComponent(a.nome + ', São Paulo');
+      return '<div class="act-card" id="card-' + a.id + '"><div class="act-card-top"><div class="act-card-name">' + a.nome + '</div><button class="btn-delete" onclick="deleteActivity(' + a.id + ')" title="Remover">✕</button></div><div class="act-card-meta"><span class="act-badge badge-tipo">' + tipoEmoji(a.tipo) + ' ' + a.tipo + '</span><span class="act-badge ' + envClass + '">' + envLabel + '</span><span class="act-badge badge-kids">' + kidsLabel + '</span></div><div class="act-card-info">' + (a.dist?'<div class="act-info-row">📍 '+a.dist+'</div>':'') + (a.horas?'<div class="act-info-row">⏰ '+a.horas+'</div>':'') + (a.obs?'<div class="act-info-row">💬 '+a.obs+'</div>':'') + (a.precoAdulto||a.precoCrianca?'<div class="act-info-row">💰 '+(a.precoAdulto?'Adulto: <strong>'+a.precoAdulto+'</strong>':'')+(a.precoAdulto&&a.precoCrianca?' · ':'')+(a.precoCrianca?'Criança: <strong>'+a.precoCrianca+'</strong>':'')+'</div>':'') + (a.link?'<div class="act-info-row">🔗 <a href="'+a.link+'" target="_blank" rel="noopener">Ver link</a></div>':'') + '</div><div class="act-card-footer"><select class="act-status-select" onchange="changeStatus(' + a.id + ',this.value)"><option value="quero"' + (a.status==='quero'?' selected':'') + '>🤍 Quero ir</option><option value="agendado"' + (a.status==='agendado'?' selected':'') + '>📅 Agendado — este fds</option><option value="feito"' + (a.status==='feito'?' selected':'') + '>✅ Já fui</option><option value="descartado"' + (a.status==='descartado'?' selected':'') + '>❌ Descartado</option></select><a class="btn-fds" href="' + calUrl + '" target="_blank" rel="noopener">📅 Prog. fds</a></div></div>';
+    }).join('');
+  }
+
+  window.setFilter = function(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.fam-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  };
+  window.toggleAddForm = function() {
+    const form = document.getElementById('add-form');
+    const btn = document.getElementById('add-btn');
+    const open = form.style.display === 'none';
+    form.style.display = open ? 'block' : 'none';
+    btn.textContent = open ? '✕ Fechar' : '＋ Adicionar';
+    if (open) { document.getElementById('f-nome').focus(); ['f-nome','f-dist','f-horas','f-link','f-obs','f-precoA','f-precoC'].forEach(id => { document.getElementById(id).value = ''; }); }
+  };
+  window.addActivity = function() {
+    const nome = document.getElementById('f-nome').value.trim();
+    if (!nome) { alert('Informe o nome da atividade.'); return; }
+    activities.unshift({ id: Date.now(), nome, tipo: document.getElementById('f-tipo').value, env: document.getElementById('f-env').value, dist: document.getElementById('f-dist').value.trim(), horas: document.getElementById('f-horas').value.trim(), link: document.getElementById('f-link').value.trim(), kids: document.getElementById('f-kids').value, obs: document.getElementById('f-obs').value.trim(), precoAdulto: document.getElementById('f-precoA').value.trim(), precoCrianca: document.getElementById('f-precoC').value.trim(), status: 'quero', src: 'manual' });
+    save(); toggleAddForm();
+    currentFilter = 'all';
+    document.querySelectorAll('.fam-filter').forEach((b,i) => b.classList.toggle('active', i===0));
+    render();
+  };
+  window.deleteActivity = function(id) { if (!confirm('Remover essa atividade?')) return; activities = activities.filter(a => a.id !== id); save(); render(); };
+  window.changeStatus = function(id, status) { const a = activities.find(x => x.id === id); if (a) { a.status = status; save(); render(); renderFdsDestaque(); } };
+
+  render();
+})();
+
+// ── Illness Diary ─────────────────────────────
+(function() {
+  const KEY = 'fam-diary-ep';
+  let episodes = JSON.parse(localStorage.getItem(KEY) || 'null');
+  const DEFAULT_EPISODES = [{
+    id: 1, filho: 'Caique', dataInicio: '2026-05-24',
+    titulo: 'Febre + congestão nasal',
+    status: 'em curso',
+    eventos: [
+      { data: '2026-05-24', desc: 'Início de febre' },
+      { data: '2026-05-25', desc: 'Melhora — febre cedeu' },
+      { data: '2026-05-27', desc: 'Febre voltou. Pouco apetite, muito congestionado. Lavagem nasal x2. Decongex Infantil gotas às 20h' }
+    ]
+  }];
+  if (!episodes) { episodes = DEFAULT_EPISODES; save(); }
+  function save() { localStorage.setItem(KEY, JSON.stringify(episodes)); }
+  const mons = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  function fmtD(d) { const [y,m,dd] = d.split('-'); return dd + '/' + mons[parseInt(m)-1]; }
+
+  function render() {
+    const list = document.getElementById('diary-list');
+    if (!episodes.length) { list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-2);font-size:13px;">Nenhum episódio registrado</div>'; return; }
+    const sorted = [...episodes].sort((a, b) => new Date(b.dataInicio) - new Date(a.dataInicio));
+    list.innerHTML = sorted.map(ep => {
+      const who = ep.filho === 'Iara' ? 'diary-ep-iara' : 'diary-ep-caique';
+      const sc = ep.status === 'em curso' ? 'diary-status-active' : 'diary-status-done';
+      const sl = ep.status === 'em curso' ? '🔴 Em curso' : '✅ Resolvido';
+      const evHtml = ep.eventos.map(e => '<div class="diary-event"><span class="diary-event-date">' + fmtD(e.data) + '</span><span class="diary-event-desc">' + e.desc + '</span></div>').join('');
+      return '<div class="diary-episode">' +
+        '<div class="diary-ep-header">' +
+          '<span class="diary-ep-who ' + who + '">' + (ep.filho==='Iara'?'🌸':'🦁') + ' ' + ep.filho + '</span>' +
+          '<span class="diary-ep-title">' + ep.titulo + '</span>' +
+          '<span style="font-size:11px;color:var(--text-2);white-space:nowrap;">desde ' + fmtD(ep.dataInicio) + '</span>' +
+          '<span class="diary-ep-status ' + sc + '">' + sl + '</span>' +
+          (ep.status==='em curso'?'<button onclick="resolveEp('+ep.id+')" style="background:var(--green);color:white;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;">Resolver ✓</button>':'') +
+          '<button onclick="deleteEp('+ep.id+')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--text-2);opacity:0.4;padding:2px 4px;" title="Excluir">✕</button>' +
+        '</div>' +
+        '<div class="diary-timeline">' + evHtml +
+          '<div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;">' +
+            '<input type="date" id="evd-'+ep.id+'" style="border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit;outline:none;"/>' +
+            '<input type="text" id="ev-'+ep.id+'" placeholder="Adicionar evento (ex: Febre 38°C, tomou Tylenol)" style="flex:1;min-width:180px;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:inherit;outline:none;"/>' +
+            '<button onclick="addEv('+ep.id+')" style="background:var(--red);color:white;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">＋ Evento</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.toggleDiaryForm = function() {
+    const form = document.getElementById('diary-form');
+    const btn = document.getElementById('diary-add-btn');
+    const open = form.style.display === 'none';
+    form.style.display = open ? 'block' : 'none';
+    btn.textContent = open ? '✕ Fechar' : '＋ Novo episódio';
+    if (open) { document.getElementById('d-data').value = new Date().toISOString().split('T')[0]; document.getElementById('d-titulo').value = ''; document.getElementById('d-desc').value = ''; }
+  };
+  window.addDiaryEpisode = function() {
+    const titulo = document.getElementById('d-titulo').value.trim();
+    const desc = document.getElementById('d-desc').value.trim();
+    if (!titulo) { alert('Informe um título.'); return; }
+    const dataInicio = document.getElementById('d-data').value;
+    episodes.unshift({ id: Date.now(), filho: document.getElementById('d-filho').value, dataInicio, titulo, status: 'em curso', eventos: desc ? [{ data: dataInicio, desc }] : [] });
+    save(); window.toggleDiaryForm(); render();
+  };
+  window.addEv = function(id) {
+    const ep = episodes.find(e => e.id === id); if (!ep) return;
+    const desc = document.getElementById('ev-'+id)?.value.trim();
+    const date = document.getElementById('evd-'+id)?.value || new Date().toISOString().split('T')[0];
+    if (!desc) { alert('Informe a descrição.'); return; }
+    ep.eventos.push({ data: date, desc }); save(); render();
+  };
+  window.resolveEp = function(id) {
+    const ep = episodes.find(e => e.id === id);
+    if (ep) { ep.status = 'resolvido'; ep.dataFim = new Date().toISOString().split('T')[0]; save(); render(); }
+  };
+  window.deleteEp = function(id) {
+    if (!confirm('Excluir episódio?')) return;
+    episodes = episodes.filter(e => e.id !== id); save(); render();
+  };
+
+  // Set today's date on diary event inputs after render
+  const todayStr = new Date().toISOString().split('T')[0];
+  render();
+  document.querySelectorAll('[id^="evd-"]').forEach(el => { if (!el.value) el.value = todayStr; });
+})();
+
+// ── Birthdays ─────────────────────────────────
+(function() {
+  const KEY = 'fam-gifts-v2';
+  let giftData = JSON.parse(localStorage.getItem(KEY) || '{}');
+  function saveG() { localStorage.setItem(KEY, JSON.stringify(giftData)); }
+
+  const BDAYS = [
+    { id: 'dona-maria-2026', name: 'Dona Maria',       emoji: '🎂', detail: 'Aniversário',    date: '2026-05-30', color: '#d97706' },
+    { id: 'caique-2026',     name: 'Caique',            emoji: '🦁', detail: '2 anos',         date: '2026-06-21', color: 'var(--caique)' },
+    { id: 'tete-2026',       name: 'Tete (Nina)',       emoji: '🎂', detail: '7 anos',         date: '2026-06-12', color: '#16a34a' },
+    { id: 'micha-2026',      name: 'Micha',             emoji: '🎉', detail: 'Aniversário',    date: '2026-08-15', color: '#16a34a' },
+    { id: 'iara-2026',       name: 'Iara',              emoji: '🌸', detail: '6 anos',         date: '2026-08-23', color: 'var(--iara)' },
+    { id: 'natalia-2026',    name: 'Natalia',           emoji: '🎉', detail: 'Aniversário',    date: '2026-12-04', color: '#16a34a' },
+    { id: 'contacts-2026',   name: '? (Contatos)',      emoji: '🎁', detail: 'Via Google Contacts', date: '2026-12-11', color: '#6b6b6b' },
+  ];
+  const mons = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  function daysUntil(d) { const t = new Date(); t.setHours(0,0,0,0); return Math.round((new Date(d+'T00:00:00') - t) / 86400000); }
+
+  function renderBdays() {
+    const wrap = document.getElementById('bday-wrap');
+    const sorted = BDAYS.map(b => ({...b, days: daysUntil(b.date)})).filter(b => b.days >= 0).sort((a,b) => a.days - b.days);
+    wrap.innerHTML = sorted.map(b => {
+      const dt = new Date(b.date + 'T12:00:00');
+      const soon = b.days <= 60;
+      const gifts = giftData[b.id] || [];
+      const gHtml = gifts.map((g, i) =>
+        '<label class="gift-item' + (g.done?' done':'') + '"><input type="checkbox"' + (g.done?' checked':'') + ' onchange="toggleGift(\''+b.id+'\','+i+',this.checked)"><span>' + g.text + '</span></label>'
+      ).join('');
+      const dLabel = b.days === 0 ? '🎉 HOJE!' : b.days === 1 ? '⚡ AMANHÃ' : b.days <= 14 ? '⚡ Em ' + b.days + ' dias' : 'Em ' + b.days + ' dias';
+      return '<div class="bday-item">' +
+        '<div class="bday-date-box' + (soon?' bday-soon':'') + '">' +
+          '<span class="day" style="color:' + (soon?'#854d0e':'var(--text)') + ';">' + dt.getDate() + '</span>' +
+          '<span class="mon">' + mons[dt.getMonth()] + '</span>' +
+        '</div>' +
+        '<div class="bday-info">' +
+          '<div class="bday-name" style="color:' + b.color + ';">' + b.emoji + ' ' + b.name + ' <span style="font-size:12px;font-weight:500;color:var(--text-2);">— ' + b.detail + '</span></div>' +
+          '<div class="bday-sub">' + dLabel + '</div>' +
+          (gifts.length ? '<div class="gift-checklist">' + gHtml + '</div>' : '') +
+          '<div class="gift-add-row">' +
+            '<input class="gift-add-input" id="gi-' + b.id + '" type="text" placeholder="Ideia de presente…" onkeydown="if(event.key===\'Enter\')addGift(\''+b.id+'\')" />' +
+            '<button class="gift-add-btn" onclick="addGift(\''+b.id+'\')">＋ Presente</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.toggleGift = function(bId, i, checked) {
+    if (!giftData[bId]) giftData[bId] = [];
+    giftData[bId][i].done = checked; saveG(); renderBdays();
+  };
+  window.addGift = function(bId) {
+    const inp = document.getElementById('gi-' + bId);
+    const text = inp?.value.trim(); if (!text) return;
+    if (!giftData[bId]) giftData[bId] = [];
+    giftData[bId].push({ text, done: false }); saveG(); renderBdays();
+  };
+
+  renderBdays();
+})();
+
+// ── Growth Tracking ────────────────────────────
+(function() {
+  const KEY = 'fam-growth-v1';
+  let gdata = JSON.parse(localStorage.getItem(KEY) || '{"iara":[],"caique":[]}');
+  if (!gdata.iara) gdata.iara = []; if (!gdata.caique) gdata.caique = [];
+  function save() { localStorage.setItem(KEY, JSON.stringify(gdata)); }
+  const mons = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  function fmtD(d) { const [y,m,dd] = d.split('-'); return dd+'/'+mons[parseInt(m)-1]+'/'+y.slice(2); }
+
+  function renderGrowth(child) {
+    const records = [...(gdata[child]||[])].sort((a,b) => new Date(b.date)-new Date(a.date));
+    const rowsEl = document.getElementById('growth-'+child+'-rows');
+    const latEl = document.getElementById('growth-'+child+'-latest');
+    const color = child==='iara' ? 'var(--iara)' : 'var(--caique)';
+    if (!records.length) {
+      rowsEl.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-2);padding:10px;">Sem registros</td></tr>';
+      latEl.innerHTML = '<div style="text-align:center;width:100%;padding:14px;color:var(--text-2);font-size:12px;">Sem medidas ainda</div>';
+      return;
+    }
+    const l = records[0];
+    latEl.innerHTML =
+      (l.peso ? '<div class="growth-stat"><div class="val" style="color:'+color+';">'+l.peso+'<span style="font-size:14px;font-weight:600;">kg</span></div><div class="lbl">Peso</div><div class="dt">'+fmtD(l.date)+'</div></div>' : '') +
+      (l.altura ? '<div class="growth-stat"><div class="val" style="color:'+color+';">'+l.altura+'<span style="font-size:14px;font-weight:600;">cm</span></div><div class="lbl">Altura</div><div class="dt">'+fmtD(l.date)+'</div></div>' : '');
+    rowsEl.innerHTML = records.map(r => '<tr><td>'+fmtD(r.date)+'</td><td>'+(r.peso||'—')+'</td><td>'+(r.altura||'—')+'</td></tr>').join('');
+  }
+
+  window.addGrowth = function(child) {
+    const p = child==='iara'?'gi':'gc';
+    const date = document.getElementById(p+'-data').value;
+    const peso = document.getElementById(p+'-peso').value;
+    const altura = document.getElementById(p+'-altura').value;
+    if (!date) { alert('Informe a data.'); return; }
+    if (!peso && !altura) { alert('Informe ao menos peso ou altura.'); return; }
+    gdata[child].push({ date, peso: peso?parseFloat(peso):null, altura: altura?parseFloat(altura):null });
+    save(); renderGrowth(child);
+    document.getElementById(p+'-peso').value = ''; document.getElementById(p+'-altura').value = '';
+  };
+
+  ['iara','caique'].forEach(c => renderGrowth(c));
+  const today = new Date().toISOString().split('T')[0];
+  ['gi-data','gc-data'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
+})();
+
+// Registra service worker (PWA — funciona offline)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
 </html>
