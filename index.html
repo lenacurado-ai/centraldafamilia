@@ -1822,13 +1822,13 @@ if ('serviceWorker' in navigator) {
   }
 
   // ── Envia áudio para /api/voice ──
-  async function sendToVoiceAPI(base64, mimeType) {
+  async function sendToVoiceAPI(audioBlob) {
     setStatus('⏳ Transcrevendo e interpretando...');
     try {
       const res = await fetch('/api/voice', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audio: base64, mimeType })
+        headers: { 'Content-Type': audioBlob.type || 'audio/webm' },
+        body: audioBlob
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -1876,13 +1876,8 @@ if ('serviceWorker' in navigator) {
       mediaRecorder.onstop = () => {
         stream.getTracks().forEach(t => t.stop());
         const usedType = mediaRecorder.mimeType || mimeType || 'audio/webm';
-        const blob = new Blob(audioChunks, { type: usedType });
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64 = reader.result.split(',')[1];
-          sendToVoiceAPI(base64, usedType);
-        };
-        reader.readAsDataURL(blob);
+        const audioBlob = new Blob(audioChunks, { type: usedType });
+        sendToVoiceAPI(audioBlob);
       };
 
       mediaRecorder.start();
