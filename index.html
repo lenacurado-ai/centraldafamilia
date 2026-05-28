@@ -1906,10 +1906,20 @@ async function loadCalendar() {
     const now = new Date(); now.setHours(0,0,0,0);
     const in14 = new Date(now.getTime() + 14 * 86400000);
 
+    // DEBUG — abra o console do navegador (F12) para ver
+    console.log('📅 Total eventos da API:', events.length);
+    events.forEach(e => {
+      const bday  = isBirthday(e);
+      const noise = isNoise(e);
+      if (bday || noise) console.log(`  ⚠️ FILTRADO [${bday?'aniversário':'ruído'}]:`, e.title, e.start);
+      else console.log('  ✅ visível:', e.title, e.start);
+    });
+
     const birthdays = events.filter(e => isBirthday(e) && !isNoise(e));
     const regular   = events.filter(e => !isBirthday(e) && !isNoise(e));
 
     window._calEvents = regular;
+    window._calAll    = events; // debug: inspecione no console com window._calAll
 
     // Alimenta seção de aniversários dinâmica
     renderCalBirthdays(birthdays);
