@@ -114,7 +114,7 @@ export default async function handler(req, res) {
     ];
 
     const results = await Promise.allSettled(
-      calendarIds.map(id => fetchEvents(id, token, 60))
+      calendarIds.map(id => fetchEvents(id, token, 180))  // 6 meses — cobre aniversários
     );
 
     const events = [];
