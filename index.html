@@ -1825,8 +1825,15 @@ function isNoise(ev) {
 
 // Palavras que identificam evento de aniversário
 function isBirthday(ev) {
-  const text = (ev.title + ' ' + (ev.description||'')).toLowerCase();
-  return text.includes('aniversário') || text.includes('birthday') || text.includes('nascimento') || text.includes(' anos') || text.includes('🎂') || text.includes('🎉');
+  const title = (ev.title || '').toLowerCase();
+  const desc  = (ev.description || '').toLowerCase();
+  const text  = title + ' ' + desc;
+  if (text.includes('niver'))    return true;
+  if (text.includes('birthday')) return true;
+  if (text.includes('festa'))    return true;
+  if (ev.title.includes('🎂')) return true;
+  if (/\d+\s*anos/.test(title)) return true;
+  return false;
 }
 
 function evDate(dateStr) {
