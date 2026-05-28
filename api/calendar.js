@@ -72,7 +72,7 @@ async function fetchEvents(calendarId, accessToken, days = 30) {
   url.searchParams.set('timeMax', timeMax);
   url.searchParams.set('singleEvents', 'true');
   url.searchParams.set('orderBy', 'startTime');
-  url.searchParams.set('maxResults', '30');
+  url.searchParams.set('maxResults', '100');
 
   const res = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${accessToken}` }
@@ -125,6 +125,9 @@ export default async function handler(req, res) {
 
     // Ordena por data
     events.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    // Debug: loga títulos no servidor (visível nos logs do Vercel)
+    console.log('Eventos retornados:', events.map(e => `${e.start?.slice(0,10)} | ${e.title}`).join('\n'));
 
     return res.status(200).json({ events });
 
