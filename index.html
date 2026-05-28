@@ -67,6 +67,18 @@ header {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 20px; padding: 5px 14px;
 }
+.sync-btn {
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--iara); color: #fff; border: none;
+  border-radius: 20px; padding: 6px 16px;
+  display: flex; align-items: center; gap: 6px;
+  transition: opacity .15s; white-space: nowrap;
+}
+.sync-btn:disabled { opacity: .55; cursor: default; }
+.sync-status {
+  font-size: 11px; color: var(--text-2); margin-top: 4px;
+  text-align: right; min-height: 14px;
+}
 
 /* ── Agenda ── */
 .agenda-section {
@@ -426,7 +438,13 @@ header {
     <h1>🏠 Central da Família</h1>
     <p>Iara & Caique Correa Curado · Vila Romana, São Paulo</p>
   </div>
-  <div class="last-updated">Atualizado em 28/05/2026</div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="last-updated">Atualizado em 28/05/2026</div>
+      <button class="sync-btn" id="sync-btn" onclick="syncNow()">☁️ Sincronizar</button>
+    </div>
+    <div class="sync-status" id="sync-status"></div>
+  </div>
 </header>
 
 <!-- ══════════════════ AGENDA ══════════════════ -->
@@ -1680,6 +1698,71 @@ function toggleSection(id) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
+
+// ── SYNC COM SUPABASE ─────────────────────────────────────────
+function getAllLocalData() {
+  const tasks = [], notes = [];
+  ['iara','caique','familia'].forEach(p => {
+    const t = JSON.parse(localStorage.getItem('familia-tasks-' + p) || '[]');
+    t.forEach(item => tasks.push({ ...item, person: p }));
+    const n = JSON.parse(localStorage.getItem('familia-notes-' + p) || '[]');
+    n.forEach(item => notes.push({ ...item, person: p }));
+  });
+  const g = JSON.parse(localStorage.getItem('familia-notes-geral') || '[]');
+  g.forEach(item => notes.push({ ...item, person: 'geral' }));
+  return { tasks, notes };
+}
+
+function applyRemoteData({ tasks = [], notes = [] }) {
+  // Agrupa por person e salva no localStorage
+  const taskMap = {}, noteMap = {};
+  tasks.forEach(t => {
+    if (!taskMap[t.person]) taskMap[t.person] = [];
+    taskMap[t.person].push({ id: t.id, text: t.text, done: t.done, date: t.date });
+  });
+  notes.forEach(n => {
+    if (!noteMap[n.person]) noteMap[n.person] = [];
+    noteMap[n.person].push({ id: n.id, text: n.text, date: n.date });
+  });
+  ['iara','caique','familia'].forEach(p => {
+    if (taskMap[p]) localStorage.setItem('familia-tasks-' + p, JSON.stringify(taskMap[p]));
+    if (noteMap[p]) localStorage.setItem('familia-notes-' + p, JSON.stringify(noteMap[p]));
+  });
+  if (noteMap['geral']) localStorage.setItem('familia-notes-geral', JSON.stringify(noteMap['geral']));
+  // Re-renderiza se função existir
+  ['iara','caique','familia'].forEach(p => {
+    if (typeof window.renderTasks === 'function') window.renderTasks(p);
+  });
+}
+
+window.syncNow = async function() {
+  const btn = document.getElementById('sync-btn');
+  const status = document.getElementById('sync-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sincronizando…';
+  status.textContent = '';
+  try {
+    const local = getAllLocalData();
+    const res = await fetch('/api/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(local)
+    });
+    if (!res.ok) throw new Error('Erro ' + res.status);
+    const remote = await res.json();
+    applyRemoteData(remote);
+    const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    status.textContent = '✅ Sincronizado às ' + now;
+    btn.textContent = '☁️ Sincronizar';
+  } catch(e) {
+    status.textContent = '❌ Erro: ' + e.message;
+    btn.textContent = '☁️ Sincronizar';
+  }
+  btn.disabled = false;
+};
+
+// Sincroniza automaticamente ao abrir o portal
+window.addEventListener('load', () => setTimeout(syncNow, 1200));
 
 // ── ASSISTENTE DE VOZ (OpenAI only) ───────────────────────────
 (function () {
