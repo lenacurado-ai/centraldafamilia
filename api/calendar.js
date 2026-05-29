@@ -92,7 +92,8 @@ async function fetchEvents(calendarId, accessToken, days = 30, daysPast = 0) {
     allDay: !e.start?.dateTime,
     location: e.location || null,
     description: e.description || null,
-    calendar: calendarId
+    calendar: calendarId,
+    htmlLink: e.htmlLink || null
   }));
 }
 
