@@ -1819,8 +1819,9 @@ const NOISE_KEYWORDS = [
   'conta de luz','conta de água','boleto','internet','academia','trabalho'
 ];
 function isNoise(ev) {
-  const text = (ev.title + ' ' + (ev.description||'')).toLowerCase();
-  return NOISE_KEYWORDS.some(k => text.includes(k));
+  // Checa ruído APENAS no título — descrições podem ter palavras genéricas (ex: link de teleconsulta)
+  const title = (ev.title || '').toLowerCase();
+  return NOISE_KEYWORDS.some(k => title.includes(k));
 }
 
 // Palavras que identificam evento de aniversário
