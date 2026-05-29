@@ -860,26 +860,14 @@ header {
 
     </div>
 
-    <!-- Consultas -->
+    <!-- Consultas — dinâmico via Google Calendar -->
     <div class="appt-header">
       <h4>📅 Consultas</h4>
-      <p>Próximas agendadas e a agendar · Google Calendar</p>
-    </div>
-    <div style="margin:0 20px 12px;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:10px 14px;font-size:12px;color:#065f46;">
-      ✅ <strong>Iara:</strong> TO toda terça às 9h · Neurologista 09/06 às 13h &nbsp;·&nbsp; <strong>Caique:</strong> sem consultas agendadas
+      <p>Sincronizado com Google Calendar</p>
     </div>
     <div style="padding:0 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);">Próximas confirmadas</div>
-    <div class="appt-list">
-      <div class="appt-item" style="border-color:#6ee7b7;background:#ecfdf5;">
-        <div class="appt-date iara-date"><span>JUN</span><span class="day">02</span><span>2026</span></div>
-        <div class="appt-details"><div class="appt-title">Terapia Ocupacional</div><div class="appt-sub">09h · R. Turiassu 519, cj 94 — Perdizes · semanais até ago/2026</div></div>
-        <span class="who-badge iara-badge">Iara</span>
-      </div>
-      <div class="appt-item" style="border-color:#6ee7b7;background:#ecfdf5;">
-        <div class="appt-date iara-date"><span>JUN</span><span class="day">09</span><span>2026</span></div>
-        <div class="appt-details"><div class="appt-title">Neurologista — teleconsulta 🖥️</div><div class="appt-sub">13h · Dra. Juliana Gaigher Gonçalves · (11) 2367-8850</div></div>
-        <span class="who-badge iara-badge">Iara</span>
-      </div>
+    <div id="appt-proximas" class="appt-list">
+      <div style="padding:10px 0;font-size:13px;color:var(--text-2);">Carregando…</div>
     </div>
     <div style="padding:10px 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);">A agendar</div>
     <div class="appt-list" style="padding-bottom:16px;">
@@ -905,24 +893,10 @@ header {
       </div>
     </div>
 
-    <!-- Histórico -->
+    <!-- Histórico — dinâmico via Google Calendar -->
     <div style="padding:0 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);">Histórico recente</div>
-    <div class="appt-list" style="padding-bottom:16px;">
-      <div class="appt-item" style="opacity:0.6;">
-        <div class="appt-date iara-date"><span>MAR</span><span class="day">10</span><span>2026</span></div>
-        <div class="appt-details"><div class="appt-title">Endocrinologista · Endoclinica Lapa</div><div class="appt-sub">Alta — sem achados relevantes</div></div>
-        <span class="who-badge iara-badge">Iara</span>
-      </div>
-      <div class="appt-item" style="opacity:0.6;">
-        <div class="appt-date iara-date"><span>FEV</span><span class="day">26</span><span>2026</span></div>
-        <div class="appt-details"><div class="appt-title">Dentista · Ana Riso Odontologia</div><div class="appt-sub">Último retorno — precisa remarcar</div></div>
-        <span class="who-badge iara-badge">Iara</span>
-      </div>
-      <div class="appt-item" style="opacity:0.6;">
-        <div class="appt-date iara-date"><span>FEV</span><span class="day">12</span><span>2026</span></div>
-        <div class="appt-details"><div class="appt-title">Otorrino</div><div class="appt-sub">Investigação desvio de septo — Alta, nada encontrado</div></div>
-        <span class="who-badge iara-badge">Iara</span>
-      </div>
+    <div id="appt-historico" class="appt-list" style="padding-bottom:16px;">
+      <div style="padding:10px 0;font-size:13px;color:var(--text-2);">Carregando…</div>
     </div>
 
     <!-- Drive exames -->
@@ -1825,6 +1799,17 @@ function isNoise(ev) {
 }
 
 // Palavras que identificam evento de aniversário
+const HEALTH_KEYWORDS = [
+  'terapia','neurologista','dentista','médico','médica','ortopedista',
+  'pediatra','dermatologista','consulta','exame','osteopata','psicólogo',
+  'psicóloga','fonoaudiólogo','oftalmologista','endocrinologista','otorrino',
+  'cardiologista','vacina','vacinação','checkup','retorno','avaliação neuropsico'
+];
+function isHealthEvent(ev) {
+  const title = (ev.title || '').toLowerCase();
+  return HEALTH_KEYWORDS.some(k => title.includes(k));
+}
+
 function isBirthday(ev) {
   const title = (ev.title || '').toLowerCase();
   const desc  = (ev.description || '').toLowerCase();
@@ -1917,10 +1902,65 @@ async function loadCalendar() {
     });
 
     const birthdays = events.filter(e => isBirthday(e) && !isNoise(e));
-    const regular   = events.filter(e => !isBirthday(e) && !isNoise(e));
+    // Festas aparecem nos dois lugares: aniversários (para pensar em presente) + calendário (para não perder)
+    const isFesta = e => (e.title || '').toLowerCase().includes('festa');
+    const regular = events.filter(e => !isNoise(e) && (!isBirthday(e) || isFesta(e)));
 
     window._calEvents = regular;
     window._calAll    = events; // debug: inspecione no console com window._calAll
+
+    // ── Consultas dinâmicas ──
+    const now2 = new Date();
+    const MONS = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+    function apptBadge(ev) {
+      const t = (ev.title + ' ' + (ev.description||'')).toLowerCase();
+      if (t.includes('iara'))   return '<span class="who-badge iara-badge">Iara</span>';
+      if (t.includes('caique')) return '<span class="who-badge caique-badge">Caique</span>';
+      return '<span class="who-badge" style="background:var(--green-light);color:var(--green);border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">Família</span>';
+    }
+
+    function apptDateBox(ev, past) {
+      const d = evDate(ev.start);
+      const cls = (ev.title + ' ' + (ev.description||'')).toLowerCase().includes('iara') ? 'iara-date' : 'caique-date';
+      const style = past ? 'opacity:0.55;' : '';
+      return `<div class="appt-date ${cls}" style="${style}"><span>${MONS[d.getMonth()]}</span><span class="day">${d.getDate()}</span><span>${d.getFullYear()}</span></div>`;
+    }
+
+    function apptTime(ev) {
+      const t = evTime(ev.start);
+      return t ? t + ' · ' : '';
+    }
+
+    function renderApptItem(ev, past) {
+      const style = past ? 'opacity:0.6;' : 'border-color:#6ee7b7;background:#ecfdf5;';
+      return `<div class="appt-item" style="${style}">
+        ${apptDateBox(ev, past)}
+        <div class="appt-details">
+          <div class="appt-title">${ev.title}</div>
+          ${ev.description ? `<div class="appt-sub">${apptTime(ev)}${ev.description.replace(/<[^>]*>/g,'').substring(0,120)}</div>` : (ev.start && ev.start.length > 10 ? `<div class="appt-sub">${apptTime(ev)}</div>` : '')}
+        </div>
+        ${apptBadge(ev)}
+      </div>`;
+    }
+
+    const healthEvents = events.filter(e => isHealthEvent(e) && !isNoise(e));
+    const futureHealth = healthEvents.filter(e => evDate(e.start) >= now2).slice(0, 15);
+    const pastHealth   = healthEvents.filter(e => evDate(e.start) < now2)
+                          .sort((a,b) => evDate(b.start) - evDate(a.start)).slice(0, 10);
+
+    const proxEl = document.getElementById('appt-proximas');
+    if (proxEl) {
+      proxEl.innerHTML = futureHealth.length
+        ? futureHealth.map(e => renderApptItem(e, false)).join('')
+        : '<div style="padding:10px 0;font-size:13px;color:var(--text-2);">Nenhuma consulta agendada.</div>';
+    }
+    const histEl = document.getElementById('appt-historico');
+    if (histEl) {
+      histEl.innerHTML = pastHealth.length
+        ? pastHealth.map(e => renderApptItem(e, true)).join('')
+        : '<div style="padding:10px 0;font-size:13px;color:var(--text-2);">Nenhum histórico encontrado.</div>';
+    }
 
     // Alimenta seção de aniversários dinâmica
     renderCalBirthdays(birthdays);
