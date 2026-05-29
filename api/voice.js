@@ -37,20 +37,20 @@ export default async function handler(req, res) {
 
   const contentType = req.headers['content-type'] || '';
   let transcript = '';
+  let parsedBody = null; // guarda o JSON parseado para uso posterior (calContext, etc.)
 
   // ── Modo TEXTO (JSON com { text }) ────────────────────────────
   if (contentType.includes('application/json')) {
-    let body;
     try {
       const raw = await readRawBody(req);
-      body = JSON.parse(raw.toString());
+      parsedBody = JSON.parse(raw.toString());
     } catch (e) {
       return res.status(400).json({ error: 'JSON inválido: ' + e.message });
     }
-    if (!body.text?.trim()) {
+    if (!parsedBody.text?.trim()) {
       return res.status(400).json({ error: 'Campo "text" ausente.' });
     }
-    transcript = body.text.trim();
+    transcript = parsedBody.text.trim();
 
   // ── Modo ÁUDIO (blob bruto) ────────────────────────────────────
   } else {
@@ -104,7 +104,19 @@ export default async function handler(req, res) {
   // ── 3. Interpreta com GPT-4o-mini ─────────────────────────────
   const today = new Date().toISOString().split('T')[0];
 
-  const systemPrompt = `${FAMILY_CONTEXT}
+  // Contexto de calendário enviado pelo frontend
+  let calContext = '';
+  if (parsedBody?.calContext) {
+    calContext = parsedBody.calContext;
+  } else {
+    calContext = req.headers['x-cal-context'] || '';
+  }
+
+  const calSection = calContext.trim()
+    ? `\n\nEVENTOS DO CALENDÁRIO DA FAMÍLIA (próximos 90 dias e últimos 30 dias):\n${calContext}`
+    : '';
+
+  const systemPrompt = `${FAMILY_CONTEXT}${calSection}
 
 Hoje é ${today}. Responda SEMPRE em português, de forma direta e amigável.
 
