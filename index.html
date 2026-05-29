@@ -1937,9 +1937,12 @@ function renderEventItem(ev) {
     .filter(Boolean).join(' · ');
 
   const boxClass = 'agenda-date-box' + evDateBoxExtra(ev);
+  const link = ev.htmlLink ? \`href="\${ev.htmlLink}" target="_blank" rel="noopener"\` : '';
+  const tag  = link ? 'a' : 'div';
 
   return \`
-    <div class="agenda-item">
+    <\${tag} class="agenda-item" \${link} style="text-decoration:none;color:inherit;\${link?'cursor:pointer;':''}"
+      \${link ? 'title="Abrir no Google Calendar"' : ''}>
       <div class="\${boxClass}">
         <span class="dow">\${DAYS_PT[d.getDay()]}</span>
         <span class="day">\${d.getDate()}</span>
@@ -1948,9 +1951,9 @@ function renderEventItem(ev) {
       <div class="agenda-info">
         <div class="agenda-title">\${title}</div>
         \${sub ? \`<div class="agenda-sub">\${sub}</div>\` : ''}
-        <div class="agenda-tags">\${evTag(ev)}</div>
+        <div class="agenda-tags">\${evTag(ev)}\${link ? '<span style="margin-left:4px;font-size:11px;color:var(--text-2);">↗</span>' : ''}</div>
       </div>
-    </div>\`;
+    </\${tag}>\`;
 }
 
 // Cache de todos os eventos para reutilizar nos aniversários e no botão fds
