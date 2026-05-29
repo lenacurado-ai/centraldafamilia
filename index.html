@@ -115,6 +115,18 @@ header {
 .agenda-date-box.hot { background: var(--red-light); border: 1px solid var(--red-border); }
 .agenda-date-box.hot .day { color: var(--red); }
 .agenda-date-box.hot .dow, .agenda-date-box.hot .mon { color: #f87171; }
+.agenda-date-box.iara-evt { background: var(--iara-light); border-color: var(--iara-border); }
+.agenda-date-box.iara-evt .day { color: var(--iara); }
+.agenda-date-box.iara-evt .dow, .agenda-date-box.iara-evt .mon { color: var(--iara); opacity: .7; }
+.agenda-date-box.caique-evt { background: var(--caique-light); border-color: var(--caique-border); }
+.agenda-date-box.caique-evt .day { color: var(--caique); }
+.agenda-date-box.caique-evt .dow, .agenda-date-box.caique-evt .mon { color: var(--caique); opacity: .7; }
+.agenda-date-box.iara-evt { background: var(--iara-light); border-color: var(--iara-border); }
+.agenda-date-box.iara-evt .day { color: var(--iara); }
+.agenda-date-box.iara-evt .dow, .agenda-date-box.iara-evt .mon { color: var(--iara); opacity: .7; }
+.agenda-date-box.caique-evt { background: var(--caique-light); border-color: var(--caique-border); }
+.agenda-date-box.caique-evt .day { color: var(--caique); }
+.agenda-date-box.caique-evt .dow, .agenda-date-box.caique-evt .mon { color: var(--caique); opacity: .7; }
 .agenda-info { flex: 1; }
 .agenda-title { font-size: 13.5px; font-weight: 600; }
 .agenda-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; line-height: 1.4; }
@@ -763,23 +775,23 @@ header {
               <div class="followup-icon">🧩</div>
               <div class="followup-content">
                 <div class="followup-title iara-color">Terapia Ocupacional</div>
-                <div class="followup-sub">Sessões semanais toda terça às 9h · R. Turiassu 519, cj 94, Perdizes · até ago/2026</div>
+                <div class="followup-sub" id="spec-terapia">Sessões semanais toda terça às 9h · R. Turiassu 519, cj 94, Perdizes · até ago/2026</div>
               </div>
-              <div class="status-badge badge-active">ATIVO</div>
+              <div class="status-badge badge-active" id="spec-terapia-badge">ATIVO</div>
             </div>
             <div class="followup-item active">
               <div class="followup-icon">🧠</div>
               <div class="followup-content">
                 <div class="followup-title iara-color">Neurologista</div>
-                <div class="followup-sub">Dra. Juliana Gaigher · Instituto Neuro Saúde · (11) 2367-8850 · teleconsulta 09/06 às 13h</div>
+                <div class="followup-sub" id="spec-neurologista">Dra. Juliana Gaigher · Instituto Neuro Saúde · (11) 2367-8850</div>
               </div>
-              <div class="status-badge badge-active">ATIVO</div>
+              <div class="status-badge badge-active" id="spec-neurologista-badge">ATIVO</div>
             </div>
             <div class="followup-item active">
               <div class="followup-icon">📋</div>
               <div class="followup-content">
                 <div class="followup-title iara-color">Avaliação Neuropsicológica</div>
-                <div class="followup-sub">Em andamento — aguardar laudo</div>
+                <div class="followup-sub" id="spec-neuropsico">Em andamento — aguardar laudo</div>
               </div>
               <div class="status-badge badge-pending">AGUARD.</div>
             </div>
@@ -787,23 +799,23 @@ header {
               <div class="followup-icon">🦷</div>
               <div class="followup-content">
                 <div class="followup-title urgent-color">Dentista — aparelho noturno</div>
-                <div class="followup-sub">Ana Riso Odontologia · consultas mensais · <strong>remarcar urgente</strong></div>
+                <div class="followup-sub" id="spec-dentista">Ana Riso Odontologia · consultas mensais</div>
               </div>
-              <div class="status-badge badge-urgent">REMARCAR</div>
+              <div class="status-badge badge-urgent" id="spec-dentista-badge">REMARCAR</div>
             </div>
             <div class="followup-item urgent">
               <div class="followup-icon">🔬</div>
               <div class="followup-content">
                 <div class="followup-title urgent-color">Dermatologista</div>
-                <div class="followup-sub">Investigar alergia de pele · ainda não agendado</div>
+                <div class="followup-sub" id="spec-dermatologista">Investigar alergia de pele · ainda não agendado</div>
               </div>
-              <div class="status-badge badge-urgent">AGENDAR</div>
+              <div class="status-badge badge-urgent" id="spec-dermatologista-badge">AGENDAR</div>
             </div>
             <div class="followup-item routine">
               <div class="followup-icon">🤸</div>
               <div class="followup-content">
                 <div class="followup-title routine-color">Osteopata</div>
-                <div class="followup-sub">Recomendado a cada 6 meses — preventivo (ambos)</div>
+                <div class="followup-sub" id="spec-osteopata">Recomendado a cada 6 meses — preventivo (ambos)</div>
               </div>
               <div class="status-badge badge-routine">PREVENTIVO</div>
             </div>
@@ -1846,34 +1858,99 @@ function evTime(dateStr) {
 }
 
 function evTag(ev) {
+  // 1. Override manual salvo pelo assistente de voz
+  const overrides = JSON.parse(localStorage.getItem('cal-tag-overrides') || '{}');
+  const override = overrides[ev.id] || overrides[(ev.title||'').toLowerCase().trim()];
+  if (override === 'iara')   return '<span class="a-tag a-iara">Iara</span>';
+  if (override === 'caique') return '<span class="a-tag a-caique">Caique</span>';
+  if (override === 'familia') return '<span class="a-tag" style="background:var(--blue-light);color:var(--blue);">Família</span>';
+
   const text = (ev.title + ' ' + (ev.description || '')).toLowerCase();
   if (text.includes('iara') && text.includes('caique')) return '<span class="a-tag a-ambos">Iara & Caique</span>';
   if (text.includes('iara'))   return '<span class="a-tag a-iara">Iara</span>';
   if (text.includes('caique')) return '<span class="a-tag a-caique">Caique</span>';
-  if (text.includes('escola') || text.includes('almanaque')) return '<span class="a-tag a-escola">Escola</span>';
+  if (text.includes('escola') || text.includes('almanaque')) return '<span class="a-tag a-escola">Escola Iara</span>';
+
+  // 2. Especialistas da Iara sem nome explícito no título
+  const IARA_HEALTH = ['terapia','neurologista','dentista','dermatologista','neuropsico','avaliação'];
+  if (IARA_HEALTH.some(k => text.includes(k))) return '<span class="a-tag a-iara">Iara</span>';
+
+  // 3. Especialistas do Caique
+  const CAIQUE_HEALTH = ['ortopedista','pediatra'];
+  if (CAIQUE_HEALTH.some(k => text.includes(k))) return '<span class="a-tag a-caique">Caique</span>';
+
   return '<span class="a-tag" style="background:var(--blue-light);color:var(--blue);">Família</span>';
 }
 
+// Adiciona emoji ao título do evento baseado no conteúdo
+function evEmoji(title) {
+  const t = title.toLowerCase();
+  if (t.includes('roda sabores')) {
+    if (t.includes('amarela') || t.includes('amarelo')) return '🍌';
+    if (t.includes('verde'))    return '🥦';
+    if (t.includes('vermelh'))  return '🍎';
+    if (t.includes('laranja'))  return '🍊';
+    if (t.includes('roxa') || t.includes('roxo')) return '🍇';
+    if (t.includes('branca') || t.includes('branco')) return '🥛';
+    return '🍽️';
+  }
+  if (t.includes('terapia') || t.includes(' to ') || t.startsWith('to ') || t.includes('ocupacional')) return '🧩';
+  if (t.includes('neurologista') || t.includes('neuro'))  return '🧠';
+  if (t.includes('dentista') || t.includes('odonto'))     return '🦷';
+  if (t.includes('foto'))      return '📸';
+  if (t.includes('reunião') || t.includes('reuniao'))     return '👥';
+  if (t.includes('passaporte') || t.includes('pf ') || t.includes(' pf') || t.includes('🛂')) return '🛂';
+  if (t.includes('vacina'))    return '💉';
+  if (t.includes('dermatol'))  return '🔬';
+  if (t.includes('pediatra'))  return '👶';
+  if (t.includes('ortoped'))   return '🦴';
+  if (t.includes('aniversário') || t.includes('niver') || t.includes('festa')) return '🎂';
+  if (t.includes('escola') || t.includes('almanaque')) return '🏫';
+  if (t.includes('viagem') || t.includes('voo'))       return '✈️';
+  return '';
+}
+
+// Cor do box de data baseada no conteúdo do evento
+function evDateBoxExtra(ev) {
+  const t = (ev.title || '').toLowerCase();
+  if (isHot(ev.start)) return ' hot';
+  if (t.includes('iara'))   return ' iara-evt';
+  if (t.includes('caique')) return ' caique-evt';
+  return '';
+}
+
 function renderEventItem(ev) {
-  const d = evDate(ev.start);
-  const hot = isHot(ev.start);
-  const time = evTime(ev.start);
-  const sub = [time ? time : '', ev.location || '', ev.description ? ev.description.slice(0, 80) : '']
+  const d     = evDate(ev.start);
+  const hot   = isHot(ev.start);
+  const time  = evTime(ev.start);
+  const emoji = evEmoji(ev.title);
+  const title = emoji ? emoji + ' ' + ev.title : ev.title;
+
+  // Descrição limpa (remove links de Meet/Zoom longos)
+  const descClean = (ev.description || '')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/<[^>]*>/g, '')
+    .trim()
+    .slice(0, 100);
+
+  const sub = [time, ev.location || '', descClean]
     .filter(Boolean).join(' · ');
 
-  return `
+  const boxClass = 'agenda-date-box' + evDateBoxExtra(ev);
+
+  return \`
     <div class="agenda-item">
-      <div class="agenda-date-box${hot ? ' hot' : ''}">
-        <span class="dow">${DAYS_PT[d.getDay()]}</span>
-        <span class="day">${d.getDate()}</span>
-        <span class="mon">${MONTHS_PT[d.getMonth()]}</span>
+      <div class="\${boxClass}">
+        <span class="dow">\${DAYS_PT[d.getDay()]}</span>
+        <span class="day">\${d.getDate()}</span>
+        <span class="mon">\${MONTHS_PT[d.getMonth()]}</span>
       </div>
       <div class="agenda-info">
-        <div class="agenda-title">${ev.title}</div>
-        ${sub ? `<div class="agenda-sub">${sub}</div>` : ''}
-        <div class="agenda-tags">${evTag(ev)}</div>
+        <div class="agenda-title">\${title}</div>
+        \${sub ? \`<div class="agenda-sub">\${sub}</div>\` : ''}
+        <div class="agenda-tags">\${evTag(ev)}</div>
       </div>
-    </div>`;
+    </div>\`;
 }
 
 // Cache de todos os eventos para reutilizar nos aniversários e no botão fds
@@ -1947,6 +2024,47 @@ async function loadCalendar() {
         ${apptBadge(ev)}
       </div>`;
     }
+
+    // ── Atualiza próxima data de cada especialista ──────────────
+    const MONS_BR = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    function nextDateLabel(events, keywords) {
+      const now3 = new Date();
+      const match = events
+        .filter(e => {
+          const t = (e.title || '').toLowerCase();
+          return keywords.some(k => t.includes(k)) && evDate(e.start) >= now3;
+        })
+        .sort((a,b) => evDate(a.start) - evDate(b.start))[0];
+      if (!match) return null;
+      const d = evDate(match.start);
+      const t = evTime(match.start);
+      return `${d.getDate()}/${MONS_BR[d.getMonth()]}${t ? ' às ' + t : ''}`;
+    }
+
+    const SPECS = [
+      { id: 'terapia',        keywords: ['terapia'],         base: 'Sessões semanais toda terça às 9h · R. Turiassu 519, cj 94, Perdizes · até ago/2026' },
+      { id: 'neurologista',   keywords: ['neurologista'],    base: 'Dra. Juliana Gaigher · Instituto Neuro Saúde · (11) 2367-8850' },
+      { id: 'neuropsico',     keywords: ['neuropsico','avaliação'],  base: 'Em andamento — aguardar laudo' },
+      { id: 'dentista',       keywords: ['dentista'],        base: 'Ana Riso Odontologia · consultas mensais' },
+      { id: 'dermatologista', keywords: ['dermatol'],        base: 'Investigar alergia de pele' },
+      { id: 'osteopata',      keywords: ['osteopata'],       base: 'Recomendado a cada 6 meses — preventivo (ambos)' },
+    ];
+
+    SPECS.forEach(s => {
+      const el    = document.getElementById('spec-' + s.id);
+      const badge = document.getElementById('spec-' + s.id + '-badge');
+      if (!el) return;
+      const next = nextDateLabel(events, s.keywords);
+      if (next) {
+        el.innerHTML = s.base + ' · <strong style="color:var(--iara);">Próxima: ' + next + '</strong>';
+        if (badge && badge.textContent === 'AGENDAR') {
+          badge.textContent = 'AGENDADO';
+          badge.className = 'status-badge badge-active';
+        }
+      } else {
+        el.innerHTML = s.base;
+      }
+    });
 
     const healthEvents = events.filter(e => isHealthEvent(e) && !isNoise(e));
     const futureHealth = healthEvents.filter(e => evDate(e.start) >= now2).slice(0, 15);
@@ -2130,12 +2248,18 @@ function renderCalBirthdays(birthdays) {
       display:flex;align-items:center;justify-content:center;
     ">📎</button>
     <input id="ast-file-input" type="file" accept="image/*,application/pdf" style="display:none">
-    <textarea id="ast-text-input" rows="1" placeholder="Pergunte, dite uma tarefa…" style="
-      flex:1;border:1px solid #e5e7eb;border-radius:20px;padding:9px 14px;
-      font-size:14px;font-family:inherit;resize:none;outline:none;
-      max-height:120px;overflow-y:auto;line-height:1.4;
-      background:#f9fafb;color:#111827;
-    "></textarea>
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+      <div id="ast-file-chip" style="display:none;background:#f3effe;border:1px solid var(--iara-border);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--iara);display:none;align-items:center;gap:6px;">
+        <span id="ast-file-chip-name" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        <button id="ast-file-chip-remove" style="background:none;border:none;cursor:pointer;color:var(--iara);font-size:14px;padding:0;line-height:1;">✕</button>
+      </div>
+      <textarea id="ast-text-input" rows="1" placeholder="Pergunte, dite uma tarefa…" style="
+        flex:1;border:1px solid #e5e7eb;border-radius:20px;padding:9px 14px;
+        font-size:14px;font-family:inherit;resize:none;outline:none;
+        max-height:120px;overflow-y:auto;line-height:1.4;
+        background:#f9fafb;color:#111827;
+      "></textarea>
+    </div>
     <button id="ast-action-btn" title="Gravar ou enviar" style="
       flex-shrink:0;width:38px;height:38px;border-radius:50%;border:none;
       background:#7c3aed;color:#fff;font-size:18px;cursor:pointer;
@@ -2149,10 +2273,12 @@ function renderCalBirthdays(birthdays) {
   const bubble = document.createElement('div');
   bubble.id = 'ast-bubble';
   bubble.style.cssText = `
-    display:none;position:fixed;bottom:72px;left:12px;right:12px;z-index:999;
-    background:#fff;border-radius:16px;padding:16px;
-    box-shadow:0 4px 24px rgba(0,0,0,.15);border:1px solid #e8e8e4;
-    max-height:60vh;overflow-y:auto;
+    display:none;position:fixed;
+    bottom:calc(64px + env(safe-area-inset-bottom));
+    left:0;right:0;z-index:999;
+    background:#fff;border-radius:16px 16px 0 0;padding:16px 16px 12px;
+    box-shadow:0 -4px 24px rgba(0,0,0,.12);border-top:1px solid #e8e8e4;
+    max-height:65vh;overflow-y:auto;
   `;
   bubble.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -2179,7 +2305,7 @@ function renderCalBirthdays(birthdays) {
   overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:998;';
   document.body.appendChild(overlay);
 
-  let isRecording = false, mediaRecorder = null, audioChunks = [], pendingCalEvents = [];
+  let isRecording = false, mediaRecorder = null, audioChunks = [], pendingCalEvents = [], pendingFile = null;
   const $ = id => document.getElementById(id);
 
   function setStatus(msg, color) {
@@ -2203,11 +2329,20 @@ function renderCalBirthdays(birthdays) {
     pendingCalEvents = [];
   }
 
+  function clearPendingFile() {
+    pendingFile = null;
+    const chip = $('ast-file-chip');
+    if (chip) chip.style.display = 'none';
+    const inp = $('ast-file-input');
+    if (inp) inp.value = '';
+    syncActionBtn();
+  }
+
   function syncActionBtn() {
     const btn = $('ast-action-btn');
     if (isRecording) {
       btn.textContent = '⏹'; btn.style.background = '#dc2626';
-    } else if ($('ast-text-input').value.trim()) {
+    } else if ($('ast-text-input').value.trim() || pendingFile) {
       btn.textContent = '↑'; btn.style.background = '#059669';
     } else {
       btn.textContent = '🎙️'; btn.style.background = '#7c3aed';
@@ -2216,6 +2351,16 @@ function renderCalBirthdays(birthdays) {
 
   function executeAction(action) {
     if (!action || action.type === 'none') return;
+    // Override de tag de evento do calendário
+    if (action.type === 'override_tag') {
+      const overrides = JSON.parse(localStorage.getItem('cal-tag-overrides') || '{}');
+      const key = (action.title || '').toLowerCase().trim();
+      if (key && action.person) { overrides[key] = action.person; localStorage.setItem('cal-tag-overrides', JSON.stringify(overrides)); }
+      const badge = $('ast-action-badge');
+      badge.textContent = '🏷️ Tag atualizado!'; badge.style.display = 'block';
+      loadCalendar();
+      return;
+    }
     const badge = $('ast-action-badge');
     const today = new Date().toISOString().split('T')[0];
     if (action.type === 'add_task') {
@@ -2282,8 +2427,13 @@ function renderCalBirthdays(birthdays) {
     } catch(e) { setStatus('❌ ' + e.message, '#dc2626'); }
   }
 
-  async function sendFile(file) {
-    openBubble(); setStatus('⏳ Lendo ' + file.name + ' com IA…');
+  async function sendFile(file, instruction) {
+    openBubble();
+    if (instruction) {
+      $('ast-transcript').textContent = '💬 "' + instruction + '"';
+      $('ast-transcript').style.display = 'block';
+    }
+    setStatus('⏳ Lendo ' + file.name + ' com IA…');
     const reader = new FileReader();
     reader.onloadend = async () => {
       try {
@@ -2347,7 +2497,21 @@ function renderCalBirthdays(birthdays) {
   $('ast-file-btn').addEventListener('click', () => $('ast-file-input').click());
   $('ast-file-input').addEventListener('change', e => {
     const file = e.target.files?.[0];
-    if (file) { sendFile(file); e.target.value = ''; }
+    if (!file) return;
+    pendingFile = file;
+    const chip = $('ast-file-chip');
+    const chipName = $('ast-file-chip-name');
+    if (chip && chipName) {
+      chipName.textContent = '📎 ' + file.name;
+      chip.style.display = 'flex';
+    }
+    syncActionBtn();
+    $('ast-text-input').focus();
+    $('ast-text-input').placeholder = 'O que fazer com este arquivo?';
+  });
+  $('ast-file-chip-remove').addEventListener('click', () => {
+    clearPendingFile();
+    $('ast-text-input').placeholder = 'Pergunte, dite uma tarefa…';
   });
   $('ast-text-input').addEventListener('input', function() {
     this.style.height = 'auto';
@@ -2355,13 +2519,29 @@ function renderCalBirthdays(birthdays) {
     syncActionBtn();
   });
   $('ast-text-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); const t = $('ast-text-input').value.trim(); if (t) sendText(t); }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      $('ast-action-btn').click();
+    }
   });
   $('ast-action-btn').addEventListener('click', () => {
     const text = $('ast-text-input').value.trim();
-    if (isRecording) stopRecording();
-    else if (text) sendText(text);
-    else startRecording();
+    if (isRecording) {
+      stopRecording();
+    } else if (pendingFile) {
+      // Tem arquivo pendente — envia arquivo (com texto opcional como instrução)
+      const fileToSend = pendingFile;
+      const instruction = text;
+      clearPendingFile();
+      $('ast-text-input').value = '';
+      $('ast-text-input').placeholder = 'Pergunte, dite uma tarefa…';
+      syncActionBtn();
+      sendFile(fileToSend, instruction);
+    } else if (text) {
+      sendText(text);
+    } else {
+      startRecording();
+    }
   });
   $('ast-cal-confirm').addEventListener('click', async () => {
     const toAdd = [...document.querySelectorAll('#ast-events-list input[type=checkbox]:checked')]
