@@ -63,8 +63,8 @@ async function getAccessToken() {
 }
 
 // Busca eventos de um calendário
-async function fetchEvents(calendarId, accessToken, days = 30) {
-  const timeMin = new Date().toISOString();
+async function fetchEvents(calendarId, accessToken, days = 30, daysPast = 0) {
+  const timeMin = new Date(Date.now() - daysPast * 86400000).toISOString();
   const timeMax = new Date(Date.now() + days * 86400000).toISOString();
 
   const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
@@ -114,7 +114,7 @@ export default async function handler(req, res) {
     ];
 
     const results = await Promise.allSettled(
-      calendarIds.map(id => fetchEvents(id, token, 180))  // 6 meses — cobre aniversários
+      calendarIds.map(id => fetchEvents(id, token, 180, 90))  // 6 meses futuro + 90 dias passado
     );
 
     const events = [];
