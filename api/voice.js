@@ -125,12 +125,15 @@ Regras para action.type:
 - "add_task": adicionar tarefa, lembrete ou pendência
 - "complete_task": algo foi feito ou concluído
 - "add_note": registrar informação ou observação
+- "override_tag": corrigir a classificação de um evento do calendário (iara/caique/familia)
 - "none": apenas pergunta ou consulta
 
 Exemplos:
 - "adiciona remarcar dentista da Iara" → add_task, person: iara
 - "Caique tomou vacina" → complete_task, person: caique
-- "qual a próxima consulta da Iara?" → none, reply com a informação`;
+- "qual a próxima consulta da Iara?" → none, reply com a informação
+- "o evento Terapia Ocupacional está como Família mas é da Iara" → override_tag, title: "terapia ocupacional", person: "iara"
+- "corrige o tag do Neurologista para Iara" → override_tag, title: "neurologista", person: "iara" `;
 
   try {
     const gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
