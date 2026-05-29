@@ -1901,10 +1901,14 @@ async function loadCalendar() {
       else console.log('  ✅ visível:', e.title, e.start);
     });
 
-    const birthdays = events.filter(e => isBirthday(e) && !isNoise(e));
+    // Calendário e aniversários só mostram eventos futuros (a partir de hoje)
+    const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
+    const futureEvents = events.filter(e => evDate(e.start) >= todayMidnight);
+
+    const birthdays = futureEvents.filter(e => isBirthday(e) && !isNoise(e));
     // Festas aparecem nos dois lugares: aniversários (para pensar em presente) + calendário (para não perder)
     const isFesta = e => (e.title || '').toLowerCase().includes('festa');
-    const regular = events.filter(e => !isNoise(e) && (!isBirthday(e) || isFesta(e)));
+    const regular = futureEvents.filter(e => !isNoise(e) && (!isBirthday(e) || isFesta(e)));
 
     window._calEvents = regular;
     window._calAll    = events; // debug: inspecione no console com window._calAll
@@ -2011,27 +2015,92 @@ function renderCalBirthdays(birthdays) {
   const KEY = 'fam-gifts-v2';
   const giftData = JSON.parse(localStorage.getItem(KEY) || '{}');
   const mons = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
   function daysUntil(dateStr) {
     const t = new Date(); t.setHours(0,0,0,0);
     return Math.round((evDate(dateStr) - t) / 86400000);
   }
-  const sorted = birthdays.map(b => ({...b, days: daysUntil(b.start)})).filter(b => b.days >= 0).sort((a,b) => a.days - b.days);
+
+  // Remove prefixos de aniversário, deixa só o nome da pessoa
+  function cleanName(title) {
+    return title
+      .replace(/^(aniversário\s+(d[aoe]s?\s+)?|niver\s+(d[aoe]s?\s+)?|festa\s+(d[aoe]s?\s+)?|birthday\s+(of\s+)?)/i, '')
+      .replace(/\s*[-—–]\s*(aniversário|niver|birthday|festa)$/i, '')
+      .replace(/\s*!\s*$/, '')
+      .trim();
+  }
+
+  // Extrai idade se houver "X anos" no título
+  function extractAge(title) {
+    const m = title.match(/(\d+)\s*anos/i);
+    return m ? m[1] : null;
+  }
+
+  // Emoji baseado no contexto
+  function bdayEmoji(title, name) {
+    const t = title.toLowerCase();
+    const n = name.toLowerCase();
+    if (t.includes('festa')) return '🎉';
+    if (n === 'caique' || n.includes('caique')) return '🐹';
+    if (n === 'iara' || n.includes('iara')) return '🦋';
+    return '🎂';
+  }
+
+  // Cor do nome baseada na pessoa
+  function nameColor(name) {
+    const n = name.toLowerCase();
+    if (n.includes('iara')) return 'var(--iara)';
+    if (n.includes('caique')) return 'var(--caique)';
+    return 'var(--green)';
+  }
+
+  // Estilo do box de data por proximidade
+  function dateBoxStyle(days) {
+    if (days === 0) return 'background:#fef08a;border-color:#ca8a04;';       // hoje — amarelo vivo
+    if (days <= 7)  return 'background:#fef9c3;border-color:#ca8a04;';       // semana — amarelo
+    if (days <= 30) return 'background:#fef9c3;border-color:#d97706;';       // mês — amarelo suave
+    return 'background:var(--bg);border-color:var(--border);';               // longe — neutro
+  }
+
+  function dayNumColor(days) {
+    if (days <= 30) return '#854d0e';
+    return 'var(--text)';
+  }
+
+  function dLabel(days) {
+    if (days === 0) return '<span style="color:#dc2626;font-weight:700;">🎉 HOJE!</span>';
+    if (days === 1) return '<span style="color:#d97706;font-weight:600;">⚡ AMANHÃ</span>';
+    if (days <= 14) return '<span style="color:#d97706;font-weight:600;">⚡ Em '+days+' dias</span>';
+    return '<span style="color:var(--text-2);">Em '+days+' dias</span>';
+  }
+
+  const sorted = birthdays
+    .map(b => ({...b, days: daysUntil(b.start)}))
+    .filter(b => b.days >= 0)
+    .sort((a, b) => a.days - b.days);
+
   wrap.innerHTML = sorted.map(b => {
-    const dt = evDate(b.start);
-    const soon = b.days <= 60;
-    const bId = 'cal-' + b.id;
+    const dt   = evDate(b.start);
+    const bId  = 'cal-' + b.id;
     const gifts = giftData[bId] || [];
-    const dLabel = b.days === 0 ? '🎉 HOJE!' : b.days === 1 ? '⚡ AMANHÃ' : b.days <= 14 ? '⚡ Em '+b.days+' dias' : 'Em '+b.days+' dias';
-    const gHtml = gifts.map((g,i) => `<label class="gift-item${g.done?' done':''}"><input type="checkbox"${g.done?' checked':''} onchange="toggleGift('${bId}',${i},this.checked)"><span>${g.text}</span></label>`).join('');
+    const name  = cleanName(b.title);
+    const age   = extractAge(b.title);
+    const emoji = bdayEmoji(b.title, name);
+    const color = nameColor(name);
+    const gHtml = gifts.map((g,i) =>
+      `<label class="gift-item${g.done?' done':''}"><input type="checkbox"${g.done?' checked':''} onchange="toggleGift('${bId}',${i},this.checked)"><span>${g.text}</span></label>`
+    ).join('');
     return `<div class="bday-item">
-      <div class="bday-date-box${soon?' bday-soon':''}">
-        <span class="day" style="color:${soon?'#854d0e':'var(--text)'};">${dt.getDate()}</span>
-        <span class="mon">${mons[dt.getMonth()]}</span>
+      <div class="bday-date-box" style="${dateBoxStyle(b.days)}border:1.5px solid;border-radius:10px;width:48px;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;padding:4px 0;">
+        <span class="day" style="color:${dayNumColor(b.days)};font-size:22px;font-weight:800;line-height:1;">${dt.getDate()}</span>
+        <span class="mon" style="font-size:10px;font-weight:700;letter-spacing:.04em;color:${dayNumColor(b.days)};opacity:.7;">${mons[dt.getMonth()]}</span>
       </div>
       <div class="bday-info">
-        <div class="bday-name">🎂 ${b.title}</div>
-        <div class="bday-sub">${dLabel}</div>
-        ${gifts.length?'<div class="gift-checklist">'+gHtml+'</div>':''}
+        <div class="bday-name">
+          ${emoji} <strong style="color:${color};font-size:15px;">${name}</strong>${age ? `<span style="color:var(--text-2);font-size:13px;font-weight:400;"> — ${age} anos</span>` : ''}
+        </div>
+        <div class="bday-sub" style="margin-top:2px;">${dLabel(b.days)}</div>
+        ${gifts.length ? '<div class="gift-checklist">'+gHtml+'</div>' : ''}
         <div class="gift-add-row">
           <input class="gift-add-input" id="gi-${bId}" type="text" placeholder="Ideia de presente…" onkeydown="if(event.key==='Enter')addGift('${bId}')"/>
           <button class="gift-add-btn" onclick="addGift('${bId}')">＋ Presente</button>
