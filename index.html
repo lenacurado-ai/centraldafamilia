@@ -2331,10 +2331,42 @@ function renderCalBirthdays(birthdays) {
   async function sendAudio(blob) {
     openBubble(); setStatus('⏳ Transcrevendo…');
     try {
-      const res = await fetch('/api/voice', { method: 'POST', headers: { 'Content-Type': blob.type || 'audio/webm' }, body: blob });
+      // Envia áudio para transcrição + contexto de calendário via header
+      const calCtx = buildCalContext();
+      const res = await fetch('/api/voice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': blob.type || 'audio/webm',
+          'X-Cal-Context': calCtx
+        },
+        body: blob
+      });
       if (!res.ok) throw new Error('Erro ' + res.status);
       showResult(await res.json());
     } catch(e) { setStatus('❌ ' + e.message, '#dc2626'); }
+  }
+
+  // Serializa os próximos eventos do calendário em texto compacto para contexto da IA
+  function buildCalContext() {
+    const evs = window._calAll || window._calEvents || [];
+    if (!evs.length) return '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    // Inclui eventos dos próximos 90 dias + passados 30 dias
+    const cutFuture = new Date(today.getTime() + 90 * 86400000);
+    const cutPast   = new Date(today.getTime() - 30 * 86400000);
+    const lines = evs
+      .filter(e => {
+        const d = new Date(e.start);
+        return d >= cutPast && d <= cutFuture;
+      })
+      .sort((a,b) => new Date(a.start)-new Date(b.start))
+      .map(e => {
+        const d = new Date(e.start);
+        const ds = d.toISOString().slice(0,10);
+        const ts = e.start.includes('T') ? d.toTimeString().slice(0,5) : '';
+        return `${ds}${ts?' '+ts:''} | ${e.title}${e.location?' @ '+e.location:''}${e.description?' ('+e.description.replace(/https?:\/\/\S+/g,'').trim().slice(0,60)+')':''}`;
+      });
+    return lines.join('\n');
   }
 
   async function sendText(text) {
@@ -2346,7 +2378,12 @@ function renderCalBirthdays(birthdays) {
     $('ast-answer').style.display = 'none';
     setStatus('⏳ Interpretando…');
     try {
-      const res = await fetch('/api/voice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+      const calCtx = buildCalContext();
+      const res = await fetch('/api/voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, calContext: calCtx })
+      });
       if (!res.ok) throw new Error('Erro ' + res.status);
       showResult(await res.json());
     } catch(e) { setStatus('❌ ' + e.message, '#dc2626'); }
@@ -2468,27 +2505,7 @@ function renderCalBirthdays(birthdays) {
       startRecording();
     }
   });
-  $('ast-cal-confirm').addEventListener('click', async () => {
-    const toAdd = [...document.querySelectorAll('#ast-events-list input[type=checkbox]:checked')]
-      .map(cb => pendingCalEvents[parseInt(cb.dataset.idx)]).filter(Boolean);
-    if (!toAdd.length) { setStatus('⚠️ Selecione ao menos um evento.', '#d97706'); return; }
-    $('ast-cal-confirm').disabled = true;
-    setStatus('⏳ Adicionando ao Google Calendar…');
-    try {
-      const res = await fetch('/api/calendar-write', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ events: toAdd }) });
-      if (!res.ok) throw new Error('Erro ' + res.status);
-      const data = await res.json();
-      setStatus('✅ ' + data.created + ' evento(s) adicionado(s)!', '#059669');
-      $('ast-events-wrap').style.display = 'none';
-      setTimeout(() => { closeBubble(); loadCalendar(); }, 1800);
-    } catch(e) { setStatus('❌ ' + e.message, '#dc2626'); $('ast-cal-confirm').disabled = false; }
-  });
-  $('ast-cal-cancel').addEventListener('click', () => {
-    $('ast-events-wrap').style.display = 'none'; pendingCalEvents = []; setStatus('');
-  });
-
 })();
-
 </script>
 </body>
 </html>
